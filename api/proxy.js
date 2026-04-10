@@ -4,18 +4,22 @@ export default async function handler(req, res) {
 
   try {
 
+    const body = typeof req.body === "string"
+      ? JSON.parse(req.body)
+      : req.body;
+
     const response = await fetch(GAS_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(body)
     });
 
-    const data = await response.text();
+    const text = await response.text();
 
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.status(200).send(data);
+    res.status(200).send(text);
 
   } catch (err) {
     res.status(500).json({ error: err.toString() });
