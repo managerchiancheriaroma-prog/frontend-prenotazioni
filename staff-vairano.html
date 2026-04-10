@@ -24,7 +24,6 @@ button {
   margin-left:10px;
 }
 </style>
-
 </head>
 
 <body>
@@ -49,21 +48,25 @@ async function carica() {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({
-      action: "getPrenotazioniGiorno",   // ✅ FIX
+      action: "getPrenotazioniGiorno",
       ristorante: RISTORANTE,
       data: data
     })
   });
 
-  const lista = await res.json();
+  const json = await res.json();
+  console.log("VAIRANO RESPONSE:", json);
+
+  const lista = Array.isArray(json) ? json : (json.data || []);
   mostra(lista);
 }
 
 function mostra(lista) {
+
   const div = document.getElementById("lista");
   div.innerHTML = "";
 
-  if (!lista || lista.length === 0) {
+  if (!Array.isArray(lista) || lista.length === 0) {
     div.innerHTML = "Nessuna prenotazione";
     return;
   }
@@ -88,7 +91,7 @@ async function elimina(row) {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
-      action:"eliminaPrenotazione",   // ✅ FIX
+      action:"eliminaPrenotazione",
       ristorante: RISTORANTE,
       row: row
     })
