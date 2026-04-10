@@ -87,14 +87,14 @@ document.getElementById("titolo").innerText = "Prenota – " + ristorante;
 async function prenota() {
 
   const dati = {
-    ristorante: ristorante,
-    data: data.value,
-    ora: ora.value,
-    nome: nome.value,
-    telefono: telefono.value,
-    persone: Number(persone.value)
-  };
-
+  action: "prenota", // 🔥 FONDAMENTALE
+  ristorante: "<?= ristorante ?>",
+  data: document.getElementById("data").value,
+  ora: document.getElementById("ora").value,
+  nome: document.getElementById("nome").value,
+  telefono: document.getElementById("telefono").value,
+  persone: document.getElementById("persone").value
+};
   try {
 
     const res = await fetch(API_URL, {
