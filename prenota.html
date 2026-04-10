@@ -77,24 +77,31 @@ button {
 
 <script>
 
-// 🔥 METTI QUI IL TUO LINK GAS
 const API_URL = "/api/proxy";
+
+// 🔥 prende ristorante dall’URL
 const params = new URLSearchParams(window.location.search);
 const ristorante = params.get("ristorante");
 
-document.getElementById("titolo").innerText = "Prenota – " + ristorante;
+// sicurezza base
+if (!ristorante) {
+  document.getElementById("titolo").innerText = "Ristorante non valido";
+} else {
+  document.getElementById("titolo").innerText = "Prenota – " + ristorante;
+}
 
 async function prenota() {
 
   const dati = {
-  action: "prenota", // 🔥 FONDAMENTALE
-  ristorante: "<?= ristorante ?>",
-  data: document.getElementById("data").value,
-  ora: document.getElementById("ora").value,
-  nome: document.getElementById("nome").value,
-  telefono: document.getElementById("telefono").value,
-  persone: document.getElementById("persone").value
-};
+    action: "prenota",
+    ristorante: ristorante,   // ✅ FIX FONDAMENTALE
+    data: document.getElementById("data").value,
+    ora: document.getElementById("ora").value,
+    nome: document.getElementById("nome").value,
+    telefono: document.getElementById("telefono").value,
+    persone: Number(document.getElementById("persone").value)
+  };
+
   try {
 
     const res = await fetch(API_URL, {
@@ -118,7 +125,6 @@ async function prenota() {
     }
 
     box.style.display = "block";
-
     document.getElementById("form").reset();
 
   } catch (e) {
