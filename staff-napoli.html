@@ -3,6 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <title>Staff Napoli</title>
+
+<style>
+body {
+  font-family: Arial;
+  max-width:600px;
+  margin:auto;
+  padding:20px;
+}
+
+.card {
+  border:1px solid #ddd;
+  padding:10px;
+  margin-top:10px;
+  border-radius:6px;
+}
+
+button {
+  padding:6px 10px;
+  margin-left:10px;
+}
+</style>
+
 </head>
 
 <body>
@@ -27,9 +49,9 @@ async function carica() {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({
-      action: "getPrenotazioni",
+      action: "getPrenotazioniGiorno",   // ✅ FIX
       ristorante: RISTORANTE,
-      data
+      data: data
     })
   });
 
@@ -41,24 +63,34 @@ function mostra(lista) {
   const div = document.getElementById("lista");
   div.innerHTML = "";
 
+  if (!lista || lista.length === 0) {
+    div.innerHTML = "Nessuna prenotazione";
+    return;
+  }
+
   lista.forEach(p => {
     div.innerHTML += `
-      <div>
-        <b>${p.ora}</b> - ${p.nome} (${p.persone})
-        <button onclick="elimina(${p.row})">X</button>
+      <div class="card">
+        <b>${p.ora}</b> - ${p.nome} (${p.persone})<br>
+        Stato: ${p.stato || ""}
+
+        <br><br>
+
+        <button onclick="elimina(${p.row})">Elimina</button>
       </div>
     `;
   });
 }
 
 async function elimina(row) {
+
   await fetch(API_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
-      action:"elimina",
+      action:"eliminaPrenotazione",   // ✅ FIX
       ristorante: RISTORANTE,
-      row
+      row: row
     })
   });
 
