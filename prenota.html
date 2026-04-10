@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Prenota</title>
+
+<style>
+body {
+  font-family: Arial;
+  padding:20px;
+  max-width:400px;
+  margin:auto;
+}
+
+label {
+  display:block;
+  margin-top:15px;
+}
+
+input, select, button {
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+}
+
+button {
+  margin-top:20px;
+  background:#333;
+  color:white;
+  border:none;
+  border-radius:6px;
+  font-size:16px;
+}
+
+#messaggio {
+  display:none;
+  margin-top:20px;
+  padding:15px;
+  border-radius:6px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.ok { background:#d4edda; }
+.error { background:#f8d7da; }
+
+</style>
+
+</head>
+
+<body>
+
+<h2 id="titolo"></h2>
+
+<form id="form">
+
+<label>Data</label>
+<input type="date" id="data" required>
+
+<label>Ora</label>
+<input type="time" id="ora" required>
+
+<label>Nome</label>
+<input type="text" id="nome" required>
+
+<label>Telefono</label>
+<input type="text" id="telefono" required>
+
+<label>Persone</label>
+<input type="number" id="persone" required>
+
+<button type="button" onclick="prenota()">Prenota</button>
+
+</form>
+
+<div id="messaggio"></div>
+
+<script>
+
+// 🔥 METTI QUI IL TUO LINK GAS
+const API_URL = "https://script.google.com/macros/s/AKfycbywImmUw3zHHUiQoZ2DTOm-PpoQnn6-3Samb0leiIudmrmi4ngQcuhuPThchfoluIre/exec";
+
+const params = new URLSearchParams(window.location.search);
+const ristorante = params.get("ristorante");
+
+document.getElementById("titolo").innerText = "Prenota – " + ristorante;
+
+async function prenota() {
+
+  const dati = {
+    ristorante: ristorante,
+    data: data.value,
+    ora: ora.value,
+    nome: nome.value,
+    telefono: telefono.value,
+    persone: Number(persone.value)
+  };
+
+  try {
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(dati)
+    });
+
+    const json = await res.json();
+
+    let box = document.getElementById("messaggio");
+
+    if (json.success) {
+      box.className = "ok";
+      box.innerHTML = "✅ Prenotazione " + json.stato;
+    } else {
+      box.className = "error";
+      box.innerHTML = "Errore: " + json.errore;
+    }
+
+    box.style.display = "block";
+
+    document.getElementById("form").reset();
+
+  } catch (e) {
+    alert("Errore connessione");
+    console.error(e);
+  }
+}
+
+</script>
+
+</body>
+</html>

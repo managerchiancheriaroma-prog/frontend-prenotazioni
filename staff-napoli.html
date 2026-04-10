@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Staff Napoli</title>
+</head>
+
+<body>
+
+<h2>Staff Napoli</h2>
+
+<input type="date" id="data">
+<button onclick="carica()">Carica</button>
+
+<div id="lista"></div>
+
+<script>
+
+const API_URL = "/api/proxy";
+const RISTORANTE = "napoli";
+
+async function carica() {
+
+  const data = document.getElementById("data").value;
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action: "getPrenotazioni",
+      ristorante: RISTORANTE,
+      data
+    })
+  });
+
+  const lista = await res.json();
+  mostra(lista);
+}
+
+function mostra(lista) {
+  const div = document.getElementById("lista");
+  div.innerHTML = "";
+
+  lista.forEach(p => {
+    div.innerHTML += `
+      <div>
+        <b>${p.ora}</b> - ${p.nome} (${p.persone})
+        <button onclick="elimina(${p.row})">X</button>
+      </div>
+    `;
+  });
+}
+
+async function elimina(row) {
+  await fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"elimina",
+      ristorante: RISTORANTE,
+      row
+    })
+  });
+
+  carica();
+}
+
+</script>
+
+</body>
+</html>
