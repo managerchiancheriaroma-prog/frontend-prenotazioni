@@ -4,16 +4,24 @@ export default async function handler(req, res) {
 
   try {
 
-    const body = req.body;
+    // 🔥 FIX VERO: leggiamo il body RAW
+    let body = "";
 
-    console.log("BODY ARRIVATO:", body);
+    await new Promise((resolve) => {
+      req.on("data", chunk => {
+        body += chunk;
+      });
+      req.on("end", resolve);
+    });
+
+    console.log("RAW BODY:", body);
 
     const response = await fetch(GAS_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(body)
+      body: body // 🔥 passiamo RAW senza toccarlo
     });
 
     const text = await response.text();
