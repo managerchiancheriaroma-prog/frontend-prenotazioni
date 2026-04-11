@@ -4,20 +4,22 @@ export default async function handler(req, res) {
 
   try {
 
+    const body = req.body;
+
+    console.log("BODY ARRIVATO:", body);
+
     const response = await fetch(GAS_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(body)
     });
 
     const text = await response.text();
 
-    // 🔥 DEBUG (IMPORTANTISSIMO)
     console.log("RISPOSTA GAS:", text);
 
-    // prova a convertirlo in JSON
     let data;
 
     try {
@@ -25,7 +27,7 @@ export default async function handler(req, res) {
     } catch (e) {
       return res.status(500).json({
         success: false,
-        errore: "Risposta non JSON dal server",
+        errore: "Risposta non JSON",
         raw: text
       });
     }
