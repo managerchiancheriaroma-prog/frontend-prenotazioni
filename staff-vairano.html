@@ -14,14 +14,24 @@ body {
 
 .card {
   border:1px solid #ddd;
-  padding:10px;
+  padding:12px;
   margin-top:10px;
-  border-radius:6px;
+  border-radius:8px;
 }
 
+.badge {
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:12px;
+  color:white;
+}
+
+.ok { background:green; }
+.pending { background:orange; }
+
 button {
+  margin-top:8px;
   padding:6px 10px;
-  margin-left:10px;
 }
 </style>
 </head>
@@ -55,9 +65,8 @@ async function carica() {
   });
 
   const json = await res.json();
-  console.log("VAIRANO RESPONSE:", json);
 
-  const lista = Array.isArray(json) ? json : (json.data || []);
+  const lista = json.data || [];
   mostra(lista);
 }
 
@@ -66,18 +75,25 @@ function mostra(lista) {
   const div = document.getElementById("lista");
   div.innerHTML = "";
 
-  if (!Array.isArray(lista) || lista.length === 0) {
+  if (!lista.length) {
     div.innerHTML = "Nessuna prenotazione";
     return;
   }
 
   lista.forEach(p => {
+
+    const badgeClass = p.stato === "PENDING" ? "pending" : "ok";
+
     div.innerHTML += `
       <div class="card">
         <b>${p.ora}</b> - ${p.nome} (${p.persone})<br>
-        Stato: ${p.stato || ""}
 
-        <br><br>
+        Stato:
+        <span class="badge ${badgeClass}">
+          ${p.stato}
+        </span>
+
+        <br>
 
         <button onclick="elimina(${p.row})">Elimina</button>
       </div>
