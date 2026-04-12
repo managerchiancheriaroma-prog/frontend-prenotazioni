@@ -2,43 +2,84 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Staff Roma</title>
+<title>Staff</title>
 
 <style>
-body { font-family: Arial; max-width:600px; margin:auto; padding:20px; }
-.card { border:1px solid #ddd; padding:10px; margin-top:10px; border-radius:6px; }
-button { padding:6px 10px; margin-top:5px; }
+body {
+  font-family: Arial;
+  max-width:700px;
+  margin:auto;
+  padding:20px;
+}
+
+.card {
+  border:1px solid #ddd;
+  padding:10px;
+  margin-top:10px;
+  border-radius:6px;
+}
+
+button {
+  padding:6px 10px;
+  margin-top:5px;
+  margin-right:5px;
+}
+
+select, input {
+  padding:8px;
+  margin-top:10px;
+  width:100%;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Staff Roma</h2>
+<h2>👨‍🍳 Pannello Staff</h2>
 
+<label>Ristorante</label>
+<select id="ristorante">
+  <option value="roma">Roma</option>
+  <option value="napoli">Napoli</option>
+  <option value="vairano">Vairano</option>
+</select>
+
+<label>Data</label>
 <input type="date" id="data">
+
 <button onclick="carica()">Carica</button>
 
 <h3>📊 Riepilogo</h3>
-<div id="riepilogo"></div>
+<div id="riepilogo">Seleziona ristorante e data</div>
 
 <h3>📋 Prenotazioni</h3>
 <div id="lista"></div>
 
+<h3>➕ Inserisci Prenotazione (Staff)</h3>
+
+<input type="time" id="ora" placeholder="Ora">
+<input type="text" id="nome" placeholder="Nome">
+<input type="text" id="telefono" placeholder="Telefono">
+<input type="number" id="persone" placeholder="Persone">
+
+<button onclick="aggiungi()">Aggiungi Prenotazione</button>
+
 <script>
 
 const API_URL = "/api/proxy";
-const RISTORANTE = "roma";
 
 async function carica() {
 
+  const ristorante = document.getElementById("ristorante").value;
   const data = document.getElementById("data").value;
 
+  // 🔹 PRENOTAZIONI
   const res1 = await fetch(API_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
       action:"getPrenotazioniGiorno",
-      ristorante: RISTORANTE,
+      ristorante,
       data
     })
   });
@@ -46,23 +87,25 @@ async function carica() {
   const lista = await res1.json();
   mostra(lista);
 
+  // 🔹 RIEPILOGO
   const res2 = await fetch(API_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
       action:"getRiepilogoGiorno",
-      ristorante: RISTORANTE,
+      ristorante,
       data
     })
   });
 
-  const riepilogo = await res2.json();
+  const r = await res2.json();
 
   document.getElementById("riepilogo").innerHTML =
-    "Pranzo: " + riepilogo.pranzo + "/" + riepilogo.maxPranzo +
-    "<br>Cena: " + riepilogo.cena + "/" + riepilogo.maxCena;
+    "🍽️ Pranzo: " + r.pranzo + "/" + r.maxPranzo +
+    "<br>🌙 Cena: " + r.cena + "/" + r.maxCena;
 }
 
+// ===== MOSTRA LISTA =====
 function mostra(lista) {
 
   const div = document.getElementById("lista");
@@ -77,56 +120,95 @@ function mostra(lista) {
     div.innerHTML += `
       <div class="card">
         <b>${p.ora}</b> - ${p.nome} (${p.persone})<br>
-        Stato: ${p.stato}
+        📞 ${p.telefono}<br>
+        Stato: <b>${p.stato}</b>
 
-        <br>
+        <br><br>
 
-        <button onclick="conferma(${p.row})">Conferma</button>
-        <button onclick="rifiuta(${p.row})">Rifiuta</button>
-        <button onclick="elimina(${p.row})">Elimina</button>
+        <button onclick="conferma(${p.row})">✅ Conferma</button>
+        <button onclick="rifiuta(${p.row})">❌ Rifiuta</button>
+        <button onclick="elimina(${p.row})">🗑️ Elimina</button>
       </div>
     `;
   });
 }
 
+// ===== AZIONI =====
 async function conferma(row) {
+
+  const ristorante = document.getElementById("ristorante").value;
+
   await fetch(API_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
       action:"aggiornaStatoPrenotazione",
-      ristorante: RISTORANTE,
+      ristorante,
       row,
       stato:"CONFERMATA"
     })
   });
+
   carica();
 }
 
 async function rifiuta(row) {
+
+  const ristorante = document.getElementById("ristorante").value;
+
   await fetch(API_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
       action:"aggiornaStatoPrenotazione",
-      ristorante: RISTORANTE,
+      ristorante,
       row,
       stato:"RIFIUTATA"
     })
   });
+
   carica();
 }
 
 async function elimina(row) {
+
+  const ristorante = document.getElementById("ristorante").value;
+
   await fetch(API_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
       action:"eliminaPrenotazione",
-      ristorante: RISTORANTE,
+      ristorante,
       row
     })
   });
+
+  carica();
+}
+
+// ===== AGGIUNTA STAFF =====
+async function aggiungi() {
+
+  const ristorante = document.getElementById("ristorante").value;
+  const data = document.getElementById("data").value;
+
+  const dati = {
+    action: "aggiungiPrenotazioneStaff",
+    ristorante,
+    data,
+    ora: document.getElementById("ora").value,
+    nome: document.getElementById("nome").value,
+    telefono: document.getElementById("telefono").value,
+    persone: Number(document.getElementById("persone").value)
+  };
+
+  await fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(dati)
+  });
+
   carica();
 }
 
