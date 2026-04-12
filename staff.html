@@ -1,30 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Staff</title>
+
+<style>
+body {
+  font-family: Arial;
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+
+.container {
+  display:flex;
+  gap:20px;
+}
+
+.col {
+  flex:1;
+}
+
+.card {
+  border:1px solid #ddd;
+  padding:10px;
+  margin-top:10px;
+  border-radius:6px;
+}
+
+.pranzo { border-left:5px solid green; }
+.cena { border-left:5px solid blue; }
+
+.badge {
+  padding:3px 6px;
+  color:white;
+  border-radius:4px;
+  font-size:12px;
+}
+
+.CONFERMATA { background:green; }
+.PENDING { background:orange; }
+.RIFIUTATA { background:red; }
+
+input, select {
+  padding:8px;
+  margin-top:8px;
+  width:100%;
+}
+
+button {
+  padding:6px 10px;
+  margin:4px;
+}
+
+.tavolo {
+  width:80px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Gestione Staff</h2>
+
+<select id="ristorante">
+  <option value="roma">Roma</option>
+  <option value="napoli">Napoli</option>
+  <option value="vairano">Vairano</option>
+</select>
+
+<input type="date" id="data">
+
+<select id="filtro" onchange="render()">
+  <option value="tutti">Tutti</option>
+  <option value="pranzo">Pranzo</option>
+  <option value="cena">Cena</option>
+</select>
+
+<button onclick="carica()">Carica</button>
+
+<hr>
+
+<div class="container">
+  <div class="col">
+    <h3>PRANZO</h3>
+    <div id="pranzo"></div>
+  </div>
+
+  <div class="col">
+    <h3>CENA</h3>
+    <div id="cena"></div>
+  </div>
+</div>
+
+<hr>
+
+<h3>Aggiungi Prenotazione</h3>
+
+<input type="time" id="ora">
+<input type="text" id="nome" placeholder="Nome">
+<input type="text" id="telefono" placeholder="Telefono">
+<input type="number" id="persone" placeholder="Persone">
+
+<button onclick="aggiungi()">Aggiungi</button>
+
 <script>
 
-async function setTavolo(row, tavolo) {
+const API_URL = "/api/proxy";
+let prenotazioni = [];
+
+// ================= CARICA =================
+async function carica() {
 
   const ristorante = document.getElementById("ristorante").value;
-  const dataSelezionata = document.getElementById("data").value;
+  const data = document.getElementById("data").value;
 
-  const pren = prenotazioni.find(p => p.row === row);
-
-  // 🔥 FIX: uso data selezionata (NON quella della riga)
-  const check = await fetch(API_URL, {
+  const res = await fetch(API_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
-      action:"checkTavoloAlert",
+      action:"getPrenotazioniGiorno",
       ristorante,
-      data: dataSelezionata,
-      ora: pren.ora,
-      tavolo
+      data
     })
   });
 
-  const json = await check.json();
+  const json = await res.json();
+  prenotazioni = json.data || [];
 
-  if (json.alert) {
-    alert(json.message);
-  }
+  render();
+}
+
+// ================= TIPO =================
+function tipo(ora) {
+  const [h,m] = ora.split(":").map(Number);
+  return (h*60+m <= 17*60+30) ? "pranzo" : "cena";
+}
+
+// ================= RENDER =================
+function render() {
+
+  const filtro = document.getElementById("filtro").value;
+
+  const pranzoDiv = document.getElementById("pranzo");
+  const cenaDiv = document.getElementById("cena");
+
+  pranzoDiv.innerHTML = "";
+  cenaDiv.innerHTML = "";
+
+  prenotazioni.forEach(p => {
+
+    const servizio = tipo(p.ora);
+    if (filtro !== "tutti" && filtro !== servizio) return;
+
+    const html = `
+      <div class="card ${servizio}">
+        <b>${p.ora}</b> - ${p.nome} (${p.persone})<br>
+        📞 ${p.telefono}<br>
+
+        Stato:
+        <span class="badge ${p.stato}">${p.stato}</span><br>
+
+        Tavolo:
+        <input class="tavolo" value="${p.tavolo || ''}"
+        onchange="setTavolo(${p.row}, this.value)">
+
+        <br>
+
+        <button onclick="conferma(${p.row})">✔</button>
+        <button onclick="rifiuta(${p.row})">✖</button>
+        <button onclick="elimina(${p.row})">🗑</button>
+      </div>
+    `;
+
+    if (servizio === "pranzo") pranzoDiv.innerHTML += html;
+    else cenaDiv.innerHTML += html;
+
+  });
+}
+
+// ================= TAVOLO =================
+async function setTavolo(row, tavolo) {
+
+  const ristorante = document.getElementById("ristorante").value;
 
   await fetch(API_URL, {
     method:"POST",
@@ -37,4 +195,71 @@ async function setTavolo(row, tavolo) {
     })
   });
 }
+
+// ================= STATO =================
+async function conferma(row) { update(row,"CONFERMATA"); }
+async function rifiuta(row) { update(row,"RIFIUTATA"); }
+
+async function update(row, stato) {
+
+  const ristorante = document.getElementById("ristorante").value;
+
+  await fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaStatoPrenotazione",
+      ristorante,
+      row,
+      stato
+    })
+  });
+
+  carica();
+}
+
+// ================= ELIMINA =================
+async function elimina(row) {
+
+  const ristorante = document.getElementById("ristorante").value;
+
+  await fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"eliminaPrenotazione",
+      ristorante,
+      row
+    })
+  });
+
+  carica();
+}
+
+// ================= AGGIUNGI =================
+async function aggiungi() {
+
+  const ristorante = document.getElementById("ristorante").value;
+  const data = document.getElementById("data").value;
+
+  await fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiungiPrenotazioneStaff",
+      ristorante,
+      data,
+      ora: document.getElementById("ora").value,
+      nome: document.getElementById("nome").value,
+      telefono: document.getElementById("telefono").value,
+      persone: Number(document.getElementById("persone").value)
+    })
+  });
+
+  carica();
+}
+
 </script>
+
+</body>
+</html>
