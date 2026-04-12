@@ -1,291 +1,184 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Staff Gestionale</title>
+const RISTORANTI = {
+  roma: {
+    spreadsheetId: "11L9YtkT5m7ZHQIstx04X6C4HbqD6opzFkESwBB6oWik",
+    pranzo: 60,
+    cena: 60
+  },
+  vairano: {
+    spreadsheetId: "1fShOSU9cxbZufmnX4TjsFnk_AKdwHjXsC8nvaXswCPI",
+    pranzo: 60,
+    cena: 60
+  },
+  napoli: {
+    spreadsheetId: "1xkhn9aJ5gUXMxa1y2gEehWvW8o9b0K0eONYoMDIfpWI",
+    pranzo: 150,
+    cena: 150
+  }
+};
 
-<style>
-body {
-  font-family: Arial;
-  max-width:1100px;
-  margin:auto;
-  padding:20px;
+function doPost(e) {
+  try {
+
+    const d = JSON.parse(e.postData.contents);
+    const a = d.action;
+
+    if (a === "prenota") return prenota(d);
+    if (a === "getPrenotazioniGiorno") return getPrenotazioniGiorno(d);
+    if (a === "eliminaPrenotazione") return eliminaPrenotazione(d);
+    if (a === "aggiornaStatoPrenotazione") return aggiornaStatoPrenotazione(d);
+    if (a === "aggiornaTavolo") return aggiornaTavolo(d);
+    if (a === "aggiungiPrenotazioneStaff") return aggiungiPrenotazioneStaff(d);
+    if (a === "checkTavoloAlert") return checkTavoloAlert(d);
+
+    return output({ success:false, errore:"Azione non valida" });
+
+  } catch (err) {
+    return output({ success:false, errore: err.toString() });
+  }
 }
 
-.container {
-  display:flex;
-  gap:20px;
+// ================= PRENOTA =================
+function prenota(d) {
+
+  const r = RISTORANTI[d.ristorante];
+  const sheet = SpreadsheetApp.openById(r.spreadsheetId).getSheetByName("Prenotazioni");
+
+  sheet.appendRow([
+    d.data,
+    d.ora,
+    d.nome,
+    d.telefono,
+    Number(d.persone),
+    "PENDING",
+    new Date(),
+    new Date(d.data + "T" + d.ora), // 🔥 FIX DATA ORA REALE
+    ""
+  ]);
+
+  return output({ success:true, stato:"PENDING" });
 }
 
-.col {
-  flex:1;
-}
+// ================= GET =================
+function getPrenotazioniGiorno(d) {
 
-.card {
-  border:1px solid #ddd;
-  padding:10px;
-  margin-top:10px;
-  border-radius:6px;
-}
+  const r = RISTORANTI[d.ristorante];
+  const sheet = SpreadsheetApp.openById(r.spreadsheetId).getSheetByName("Prenotazioni");
 
-.pranzo { border-left:5px solid #4caf50; }
-.cena { border-left:5px solid #2196f3; }
+  const values = sheet.getDataRange().getValues();
+  const sel = new Date(d.data);
+  sel.setHours(0,0,0,0);
 
-.badge {
-  padding:3px 6px;
-  border-radius:4px;
-  color:#fff;
-  font-size:12px;
-}
+  const out = [];
 
-.CONFERMATA { background:#4caf50; }
-.PENDING { background:#ff9800; }
-.RIFIUTATA { background:#f44336; }
+  for (let i=1;i<values.length;i++) {
 
-input, select {
-  padding:8px;
-  margin-top:8px;
-  width:100%;
-}
+    const date = new Date(values[i][0]);
+    date.setHours(0,0,0,0);
 
-button {
-  padding:6px 10px;
-  margin:4px;
-}
+    if (date.getTime() === sel.getTime()) {
 
-.tavolo {
-  width:80px;
-}
-</style>
-</head>
-
-<body>
-
-<h2>👨‍🍳 Gestionale Staff</h2>
-
-<label>Ristorante</label>
-<select id="ristorante">
-  <option value="roma">Roma</option>
-  <option value="napoli">Napoli</option>
-  <option value="vairano">Vairano</option>
-</select>
-
-<label>Data</label>
-<input type="date" id="data">
-
-<label>Filtro</label>
-<select id="filtro" onchange="render()">
-  <option value="tutti">Tutti</option>
-  <option value="pranzo">Pranzo</option>
-  <option value="cena">Cena</option>
-</select>
-
-<button onclick="carica()">Carica</button>
-
-<hr>
-
-<div class="container">
-  <div class="col">
-    <h3>🍽 PRANZO</h3>
-    <div id="pranzo"></div>
-  </div>
-
-  <div class="col">
-    <h3>🌙 CENA</h3>
-    <div id="cena"></div>
-  </div>
-</div>
-
-<hr>
-
-<h3>➕ Inserisci Prenotazione</h3>
-
-<input type="time" id="ora">
-<input type="text" id="nome" placeholder="Nome">
-<input type="text" id="telefono" placeholder="Telefono">
-<input type="number" id="persone" placeholder="Persone">
-
-<button onclick="aggiungi()">Aggiungi</button>
-
-<script>
-
-const API_URL = "/api/proxy";
-
-let prenotazioni = [];
-
-// ================= CARICA =================
-async function carica() {
-
-  const ristorante = document.getElementById("ristorante").value;
-  const data = document.getElementById("data").value;
-
-  const res = await fetch(API_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"getPrenotazioniGiorno",
-      ristorante,
-      data
-    })
-  });
-
-  const json = await res.json();
-  prenotazioni = json.data || [];
-
-  render();
-}
-
-// ================= TIPO =================
-function tipo(ora) {
-  const [h,m] = ora.split(":").map(Number);
-  return (h*60+m <= 17*60+30) ? "pranzo" : "cena";
-}
-
-// ================= RENDER =================
-function render() {
-
-  const filtro = document.getElementById("filtro").value;
-
-  const pranzoDiv = document.getElementById("pranzo");
-  const cenaDiv = document.getElementById("cena");
-
-  pranzoDiv.innerHTML = "";
-  cenaDiv.innerHTML = "";
-
-  prenotazioni.forEach(p => {
-
-    const servizio = tipo(p.ora);
-
-    if (filtro !== "tutti" && filtro !== servizio) return;
-
-    const card = `
-      <div class="card ${servizio}">
-        <b>${p.ora}</b> - ${p.nome} (${p.persone})<br>
-        📞 ${p.telefono}<br>
-
-        Stato:
-        <span class="badge ${p.stato}">${p.stato}</span><br>
-
-        🪑 Tavolo:
-        <input class="tavolo" value="${p.tavolo || ''}"
-        onchange="setTavolo(${p.row}, this.value)">
-
-        <br>
-
-        <button onclick="conferma(${p.row})">✔</button>
-        <button onclick="rifiuta(${p.row})">✖</button>
-        <button onclick="elimina(${p.row})">🗑</button>
-      </div>
-    `;
-
-    if (servizio === "pranzo") {
-      pranzoDiv.innerHTML += card;
-    } else {
-      cenaDiv.innerHTML += card;
+      out.push({
+        row: i+1,
+        data: values[i][0],
+        ora: values[i][1],
+        nome: values[i][2],
+        telefono: values[i][3],
+        persone: values[i][4],
+        stato: values[i][5],
+        tavolo: values[i][8] || ""
+      });
     }
-  });
-}
-
-// ================= ALERT TAVOLO =================
-async function setTavolo(row, tavolo) {
-
-  const ristorante = document.getElementById("ristorante").value;
-  const pren = prenotazioni.find(p => p.row === row);
-
-  const check = await fetch(API_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"checkTavoloAlert",
-      ristorante,
-      data: pren.data,
-      ora: pren.ora,
-      tavolo
-    })
-  });
-
-  const json = await check.json();
-
-  if (json.alert) {
-    alert(json.message);
   }
 
-  await fetch(API_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"aggiornaTavolo",
-      ristorante,
-      row,
-      tavolo
-    })
-  });
+  return output({ success:true, data: out });
 }
 
-// ================= STATO =================
-async function conferma(row) { update(row,"CONFERMATA"); }
-async function rifiuta(row) { update(row,"RIFIUTATA"); }
+// ================= ALERT =================
+function checkTavoloAlert(d) {
 
-async function update(row, stato) {
+  const r = RISTORANTI[d.ristorante];
+  const sheet = SpreadsheetApp.openById(r.spreadsheetId).getSheetByName("Prenotazioni");
 
-  const ristorante = document.getElementById("ristorante").value;
+  const values = sheet.getDataRange().getValues();
 
-  await fetch(API_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"aggiornaStatoPrenotazione",
-      ristorante,
-      row,
-      stato
-    })
-  });
+  const nuova = new Date(d.data + "T" + d.ora); // 🔥 FIX
+  const nuovoTavolo = d.tavolo;
 
-  carica();
+  if (!nuovoTavolo) return output({ success:true, alert:false });
+
+  for (let i=1;i<values.length;i++) {
+
+    const tavolo = values[i][8];
+    if (!tavolo || tavolo != nuovoTavolo) continue;
+
+    const dataOra = new Date(values[i][7]);
+    if (isNaN(dataOra)) continue;
+
+    const diff = Math.abs(nuova - dataOra) / (1000 * 60);
+
+    if (diff <= 90) {
+      return output({
+        success:true,
+        alert:true,
+        message:"⚠️ Tavolo già occupato entro 90 minuti"
+      });
+    }
+  }
+
+  return output({ success:true, alert:false });
 }
 
-// ================= ELIMINA =================
-async function elimina(row) {
+// ================= ALTRO =================
+function eliminaPrenotazione(d) {
+  const r = RISTORANTI[d.ristorante];
+  SpreadsheetApp.openById(r.spreadsheetId)
+    .getSheetByName("Prenotazioni")
+    .deleteRow(d.row);
 
-  const ristorante = document.getElementById("ristorante").value;
-
-  await fetch(API_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"eliminaPrenotazione",
-      ristorante,
-      row
-    })
-  });
-
-  carica();
+  return output({ success:true });
 }
 
-// ================= AGGIUNGI =================
-async function aggiungi() {
+function aggiornaStatoPrenotazione(d) {
+  const r = RISTORANTI[d.ristorante];
+  SpreadsheetApp.openById(r.spreadsheetId)
+    .getSheetByName("Prenotazioni")
+    .getRange(d.row,6)
+    .setValue(d.stato);
 
-  const ristorante = document.getElementById("ristorante").value;
-  const data = document.getElementById("data").value;
-
-  await fetch(API_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"aggiungiPrenotazioneStaff",
-      ristorante,
-      data,
-      ora: document.getElementById("ora").value,
-      nome: document.getElementById("nome").value,
-      telefono: document.getElementById("telefono").value,
-      persone: Number(document.getElementById("persone").value)
-    })
-  });
-
-  carica();
+  return output({ success:true });
 }
 
-</script>
+function aggiornaTavolo(d) {
+  const r = RISTORANTI[d.ristorante];
+  SpreadsheetApp.openById(r.spreadsheetId)
+    .getSheetByName("Prenotazioni")
+    .getRange(d.row,9)
+    .setValue(d.tavolo);
 
-</body>
-</html>
+  return output({ success:true });
+}
+
+function aggiungiPrenotazioneStaff(d) {
+  const r = RISTORANTI[d.ristorante];
+  const sheet = SpreadsheetApp.openById(r.spreadsheetId).getSheetByName("Prenotazioni");
+
+  sheet.appendRow([
+    d.data,
+    d.ora,
+    d.nome,
+    d.telefono,
+    Number(d.persone),
+    "CONFERMATA",
+    new Date(),
+    new Date(d.data + "T" + d.ora),
+    ""
+  ]);
+
+  return output({ success:true });
+}
+
+function output(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
