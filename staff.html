@@ -119,7 +119,8 @@ async function carica() {
     })
   });
 
-  prenotazioni = await res1.json();
+  const json = await res.json();
+prenotazioni = json.data || [];
 
   filtra();
 
