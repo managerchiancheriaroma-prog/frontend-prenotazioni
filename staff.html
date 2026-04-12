@@ -108,8 +108,7 @@ async function carica() {
   const ristorante = document.getElementById("ristorante").value;
   const data = document.getElementById("data").value;
 
-  // PRENOTAZIONI
-  const res1 = await fetch(API_URL, {
+  const res = await fetch(API_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
@@ -120,10 +119,13 @@ async function carica() {
   });
 
   const json = await res.json();
-prenotazioni = json.data || [];
+
+  console.log("RESPONSE:", json);
+
+  prenotazioni = json.data || [];  // 🔥 FIX
 
   filtra();
-
+}
   // RIEPILOGO
   const res2 = await fetch(API_URL, {
     method:"POST",
