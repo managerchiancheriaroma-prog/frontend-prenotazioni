@@ -25,30 +25,52 @@ button {
   margin-right:5px;
 }
 
-select, input {
+input, select {
   padding:8px;
   margin-top:10px;
   width:100%;
+}
+
+.stato-CONFERMATA { background:#d4edda; }
+.stato-PENDING { background:#fff3cd; }
+.stato-RIFIUTATA { background:#f8d7da; }
+
+.tavolo {
+  width:80px;
+  margin-top:5px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>👨‍🍳 Staff</h2>
+<h2>👨‍🍳 Gestionale Staff</h2>
 
+<label>Ristorante</label>
 <select id="ristorante">
   <option value="roma">Roma</option>
   <option value="napoli">Napoli</option>
   <option value="vairano">Vairano</option>
 </select>
 
+<label>Data</label>
 <input type="date" id="data">
 
 <button onclick="carica()">Carica</button>
 
 <h3>📋 Prenotazioni</h3>
 <div id="lista"></div>
+
+<hr>
+
+<h3>➕ Inserisci Prenotazione</h3>
+
+<input type="time" id="ora">
+<input type="text" id="nome" placeholder="Nome">
+<input type="text" id="telefono" placeholder="Telefono">
+<input type="number" id="persone" placeholder="Persone">
+
+<button onclick="aggiungi()">Aggiungi</button>
 
 <script>
 
@@ -75,7 +97,6 @@ async function carica() {
     });
 
     const json = await res.json();
-
     console.log("RESPONSE:", json);
 
     prenotazioni = json.data || [];
@@ -83,7 +104,7 @@ async function carica() {
     mostra();
 
   } catch (e) {
-    console.error("Errore fetch:", e);
+    console.error("Errore:", e);
   }
 }
 
@@ -101,14 +122,109 @@ function mostra() {
   prenotazioni.forEach(p => {
 
     div.innerHTML += `
-      <div class="card">
+      <div class="card stato-${p.stato}">
         <b>${p.ora}</b> - ${p.nome} (${p.persone})<br>
         📞 ${p.telefono}<br>
+
         Stato: <b>${p.stato}</b><br>
-        🪑 Tavolo: ${p.tavolo || "-"}
+
+        🪑 Tavolo:
+        <input class="tavolo" value="${p.tavolo || ''}" 
+        onchange="setTavolo(${p.row}, this.value)">
+
+        <br>
+
+        <button onclick="conferma(${p.row})">✅</button>
+        <button onclick="rifiuta(${p.row})">❌</button>
+        <button onclick="elimina(${p.row})">🗑️</button>
       </div>
     `;
   });
+}
+
+// ================= TAVOLO =================
+async function setTavolo(row, tavolo) {
+
+  const ristorante = document.getElementById("ristorante").value;
+
+  await fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaTavolo",
+      ristorante,
+      row,
+      tavolo
+    })
+  });
+}
+
+// ================= STATO =================
+async function conferma(row) {
+  aggiornaStato(row, "CONFERMATA");
+}
+
+async function rifiuta(row) {
+  aggiornaStato(row, "RIFIUTATA");
+}
+
+async function aggiornaStato(row, stato) {
+
+  const ristorante = document.getElementById("ristorante").value;
+
+  await fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaStatoPrenotazione",
+      ristorante,
+      row,
+      stato
+    })
+  });
+
+  carica();
+}
+
+// ================= ELIMINA =================
+async function elimina(row) {
+
+  const ristorante = document.getElementById("ristorante").value;
+
+  await fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"eliminaPrenotazione",
+      ristorante,
+      row
+    })
+  });
+
+  carica();
+}
+
+// ================= AGGIUNGI =================
+async function aggiungi() {
+
+  const ristorante = document.getElementById("ristorante").value;
+  const data = document.getElementById("data").value;
+
+  await fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiungiPrenotazioneStaff",
+      ristorante,
+      data,
+      ora: document.getElementById("ora").value,
+      nome: document.getElementById("nome").value,
+      telefono: document.getElementById("telefono").value,
+      persone: Number(document.getElementById("persone").value)
+    })
+  });
+
+  carica();
 }
 
 </script>
