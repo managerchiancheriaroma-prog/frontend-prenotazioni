@@ -2,14 +2,19 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Staff</title>
+<title>Staff con Piantina</title>
 
 <style>
 body {
   font-family: Arial;
-  max-width:1100px;
+  max-width:1200px;
   margin:auto;
   padding:20px;
+}
+
+.top {
+  display:flex;
+  gap:10px;
 }
 
 .container {
@@ -26,93 +31,82 @@ body {
   padding:10px;
   margin-top:10px;
   border-radius:6px;
+  cursor:pointer;
 }
 
-.pranzo { border-left:5px solid green; }
-.cena { border-left:5px solid blue; }
-
-.badge {
-  padding:3px 6px;
-  color:white;
-  border-radius:4px;
-  font-size:12px;
+.selected {
+  background:#e0f7fa;
 }
 
-.CONFERMATA { background:green; }
-.PENDING { background:orange; }
-.RIFIUTATA { background:red; }
-
-input, select {
-  padding:8px;
-  margin-top:8px;
-  width:100%;
-}
-
-button {
-  padding:6px 10px;
-  margin:4px;
+.tavoli {
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:10px;
+  margin-top:10px;
 }
 
 .tavolo {
-  width:80px;
+  padding:15px;
+  text-align:center;
+  border-radius:8px;
+  cursor:pointer;
+  color:white;
+  font-weight:bold;
+}
+
+.libero { background:green; }
+.pending { background:orange; }
+.confermato { background:red; }
+
+h3 {
+  margin-top:30px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Gestione Staff</h2>
+<h2>Staff - Piantina Roma</h2>
 
-<select id="ristorante">
-  <option value="roma">Roma</option>
-  <option value="napoli">Napoli</option>
-  <option value="vairano">Vairano</option>
-</select>
-
-<input type="date" id="data">
-
-<select id="filtro" onchange="render()">
-  <option value="tutti">Tutti</option>
-  <option value="pranzo">Pranzo</option>
-  <option value="cena">Cena</option>
-</select>
-
-<button onclick="carica()">Carica</button>
-
-<hr>
-
-<div class="container">
-  <div class="col">
-    <h3>PRANZO</h3>
-    <div id="pranzo"></div>
-  </div>
-
-  <div class="col">
-    <h3>CENA</h3>
-    <div id="cena"></div>
-  </div>
+<div class="top">
+  <input type="date" id="data">
+  <button onclick="carica()">Carica</button>
 </div>
 
-<hr>
+<div class="container">
 
-<h3>Aggiungi Prenotazione</h3>
+<!-- PRENOTAZIONI -->
+<div class="col">
+  <h3>Prenotazioni</h3>
+  <div id="lista"></div>
+</div>
 
-<input type="time" id="ora">
-<input type="text" id="nome" placeholder="Nome">
-<input type="text" id="telefono" placeholder="Telefono">
-<input type="number" id="persone" placeholder="Persone">
+<!-- PIANTINA -->
+<div class="col">
 
-<button onclick="aggiungi()">Aggiungi</button>
+<h3>Sala Interna</h3>
+<div id="interna" class="tavoli"></div>
+
+<h3>Sala Esterna</h3>
+<div id="esterna" class="tavoli"></div>
+
+</div>
+
+</div>
 
 <script>
 
 const API_URL = "/api/proxy";
 let prenotazioni = [];
+let selezionata = null;
+
+// ================= TAVOLI ROMA =================
+const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
+const tavoliEsterna = [21,22,23,24,25,26,41,42];
 
 // ================= CARICA =================
 async function carica() {
 
-  const ristorante = document.getElementById("ristorante").value;
   const data = document.getElementById("data").value;
 
   const res = await fetch(API_URL, {
@@ -120,7 +114,7 @@ async function carica() {
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
       action:"getPrenotazioniGiorno",
-      ristorante,
+      ristorante:"roma",
       data
     })
   });
@@ -128,131 +122,93 @@ async function carica() {
   const json = await res.json();
   prenotazioni = json.data || [];
 
-  render();
+  renderLista();
+  renderTavoli();
 }
 
-// ================= TIPO =================
-function tipo(ora) {
-  const [h,m] = ora.split(":").map(Number);
-  return (h*60+m <= 17*60+30) ? "pranzo" : "cena";
-}
+// ================= LISTA =================
+function renderLista() {
 
-// ================= RENDER =================
-function render() {
-
-  const filtro = document.getElementById("filtro").value;
-
-  const pranzoDiv = document.getElementById("pranzo");
-  const cenaDiv = document.getElementById("cena");
-
-  pranzoDiv.innerHTML = "";
-  cenaDiv.innerHTML = "";
+  const div = document.getElementById("lista");
+  div.innerHTML = "";
 
   prenotazioni.forEach(p => {
 
-    const servizio = tipo(p.ora);
-    if (filtro !== "tutti" && filtro !== servizio) return;
+    const el = document.createElement("div");
+    el.className = "card";
 
-    const html = `
-      <div class="card ${servizio}">
-        <b>${p.ora}</b> - ${p.nome} (${p.persone})<br>
-        📞 ${p.telefono}<br>
-
-        Stato:
-        <span class="badge ${p.stato}">${p.stato}</span><br>
-
-        Tavolo:
-        <input class="tavolo" value="${p.tavolo || ''}"
-        onchange="setTavolo(${p.row}, this.value)">
-
-        <br>
-
-        <button onclick="conferma(${p.row})">✔</button>
-        <button onclick="rifiuta(${p.row})">✖</button>
-        <button onclick="elimina(${p.row})">🗑</button>
-      </div>
+    el.innerHTML = `
+      <b>${p.ora}</b> - ${p.nome} (${p.persone})<br>
+      Stato: ${p.stato}<br>
+      Tavolo: ${p.tavolo || "-"}
     `;
 
-    if (servizio === "pranzo") pranzoDiv.innerHTML += html;
-    else cenaDiv.innerHTML += html;
+    el.onclick = () => {
+      selezionata = p;
+      document.querySelectorAll(".card").forEach(c => c.classList.remove("selected"));
+      el.classList.add("selected");
+    };
 
+    div.appendChild(el);
   });
 }
 
-// ================= TAVOLO =================
-async function setTavolo(row, tavolo) {
+// ================= COLORE =================
+function statoTavolo(numero) {
 
-  const ristorante = document.getElementById("ristorante").value;
+  const tav = prenotazioni.find(p => p.tavolo == numero);
+
+  if (!tav) return "libero";
+  if (tav.stato === "PENDING") return "pending";
+  return "confermato";
+}
+
+// ================= PIANTINA =================
+function renderTavoli() {
+
+  const interna = document.getElementById("interna");
+  const esterna = document.getElementById("esterna");
+
+  interna.innerHTML = "";
+  esterna.innerHTML = "";
+
+  tavoliInterna.forEach(t => {
+    interna.appendChild(creaTavolo(t));
+  });
+
+  tavoliEsterna.forEach(t => {
+    esterna.appendChild(creaTavolo(t));
+  });
+}
+
+// ================= CREA TAVOLO =================
+function creaTavolo(numero) {
+
+  const div = document.createElement("div");
+  div.className = "tavolo " + statoTavolo(numero);
+  div.innerText = numero;
+
+  div.onclick = () => assegna(numero);
+
+  return div;
+}
+
+// ================= ASSEGNA =================
+async function assegna(numero) {
+
+  if (!selezionata) {
+    alert("Seleziona una prenotazione");
+    return;
+  }
 
   await fetch(API_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
       action:"aggiornaTavolo",
-      ristorante,
-      row,
-      tavolo
-    })
-  });
-}
-
-// ================= STATO =================
-async function conferma(row) { update(row,"CONFERMATA"); }
-async function rifiuta(row) { update(row,"RIFIUTATA"); }
-
-async function update(row, stato) {
-
-  const ristorante = document.getElementById("ristorante").value;
-
-  await fetch(API_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"aggiornaStatoPrenotazione",
-      ristorante,
-      row,
-      stato
-    })
-  });
-
-  carica();
-}
-
-// ================= ELIMINA =================
-async function elimina(row) {
-
-  const ristorante = document.getElementById("ristorante").value;
-
-  await fetch(API_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"eliminaPrenotazione",
-      ristorante,
-      row
-    })
-  });
-
-  carica();
-}
-
-// ================= AGGIUNGI =================
-async function aggiungi() {
-
-  const ristorante = document.getElementById("ristorante").value;
-  const data = document.getElementById("data").value;
-
-  await fetch(API_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"aggiungiPrenotazioneStaff",
-      ristorante,
-      data,
-      ora: document.getElementById("ora").value,
-      nome: document.getElementById("nome").value,
-      telefono: document.getElementById("telefono").value,
-      persone: Number(document.getElementById("persone").value)
+      ristorante:"roma",
+      row: selezionata.row,
+      tavolo: numero
     })
   });
 
