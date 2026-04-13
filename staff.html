@@ -13,11 +13,9 @@ body {
   background:#f5f5f5;
 }
 
-/* HEADER */
 .header {
   display:flex;
   justify-content:space-between;
-  align-items:flex-start;
   gap:20px;
 }
 
@@ -43,11 +41,6 @@ button {
   color:white;
 }
 
-button:hover {
-  background:#555;
-}
-
-/* LAYOUT */
 .container {
   display:flex;
   gap:20px;
@@ -58,7 +51,6 @@ button:hover {
   flex:1;
 }
 
-/* PRENOTAZIONI */
 .card {
   background:white;
   border-radius:10px;
@@ -72,7 +64,6 @@ button:hover {
   border:2px solid #00bcd4;
 }
 
-/* TAVOLI */
 .tavoli {
   display:grid;
   grid-template-columns: repeat(4, 1fr);
@@ -102,27 +93,24 @@ h3 {
 
 <h2>Gestione Staff</h2>
 
-<!-- HEADER -->
 <div class="header">
 
   <!-- SINISTRA -->
   <div class="left">
 
-    <select id="ristorante">
+    <select id="ristorante" onchange="carica()">
       <option value="roma">Roma</option>
       <option value="napoli">Napoli</option>
       <option value="vairano">Vairano</option>
     </select>
 
-    <input type="date" id="data">
+    <input type="date" id="data" onchange="carica()">
 
-    <select id="servizio">
+    <select id="servizio" onchange="render()">
       <option value="tutti">Tutti</option>
       <option value="pranzo">Pranzo</option>
       <option value="cena">Cena</option>
     </select>
-
-    <button onclick="carica()">Carica</button>
 
   </div>
 
@@ -144,16 +132,13 @@ h3 {
 
 </div>
 
-<!-- CONTENUTO -->
 <div class="container">
 
-<!-- LISTA -->
 <div class="col">
   <h3>Prenotazioni</h3>
   <div id="lista"></div>
 </div>
 
-<!-- PIANTINA -->
 <div class="col">
 
 <h3>Sala Interna</h3>
@@ -173,15 +158,23 @@ const API_URL = "/api/proxy";
 let prenotazioni = [];
 let selezionata = null;
 
-// TAVOLI ROMA
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
+
+// ================= AUTO LOAD ON START =================
+window.onload = () => {
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("data").value = today;
+  carica();
+};
 
 // ================= CARICA =================
 async function carica() {
 
   const ristorante = document.getElementById("ristorante").value;
   const data = document.getElementById("data").value;
+
+  if (!data) return;
 
   const res = await fetch(API_URL, {
     method:"POST",
@@ -207,7 +200,6 @@ function tipo(ora) {
 
 // ================= RENDER =================
 function render() {
-
   renderLista();
   renderTavoli();
 }
@@ -260,14 +252,12 @@ function renderTavoli() {
   tavoliEsterna.forEach(t => esterna.appendChild(creaTavolo(t, filtro)));
 }
 
-// ================= STATO TAVOLO =================
+// ================= STATO =================
 function statoTavolo(numero, filtro) {
 
   const tav = prenotazioni.find(p => {
     if (p.tavolo != numero) return false;
-
     if (filtro === "tutti") return true;
-
     return tipo(p.ora) === filtro;
   });
 
@@ -276,7 +266,7 @@ function statoTavolo(numero, filtro) {
   return "confermato";
 }
 
-// ================= CREA TAVOLO =================
+// ================= CREA =================
 function creaTavolo(numero, filtro) {
 
   const div = document.createElement("div");
