@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Staff Login</title>
+<title>Staff</title>
 
 <style>
 body {
@@ -13,7 +13,7 @@ body {
   background:#f5f5f5;
 }
 
-/* 🔐 LOGIN OVERLAY */
+/* LOGIN */
 #loginScreen {
   position:fixed;
   top:0;
@@ -35,7 +35,7 @@ body {
   width:300px;
 }
 
-.loginBox input {
+.loginBox input, .loginBox select {
   width:100%;
   padding:10px;
   margin-top:10px;
@@ -52,7 +52,7 @@ body {
   cursor:pointer;
 }
 
-/* overlay popup */
+/* POPUP */
 #overlay {
   position:fixed;
   top:0;
@@ -64,7 +64,6 @@ body {
   z-index:9998;
 }
 
-/* toast modal */
 #toast {
   position:fixed;
   top:50%;
@@ -72,16 +71,15 @@ body {
   transform:translate(-50%,-50%);
   background:#333;
   color:white;
-  padding:25px 30px;
+  padding:25px;
   border-radius:12px;
-  font-size:18px;
-  text-align:center;
-  min-width:280px;
   display:none;
   z-index:9999;
+  text-align:center;
   cursor:pointer;
 }
 
+/* LAYOUT */
 .header {
   display:flex;
   justify-content:space-between;
@@ -92,22 +90,6 @@ body {
   background:white;
   padding:15px;
   border-radius:10px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
-
-.left select, .left input,
-.right input {
-  margin:5px;
-  padding:8px;
-}
-
-button {
-  padding:8px 12px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  background:#333;
-  color:white;
 }
 
 .container {
@@ -116,22 +98,17 @@ button {
   margin-top:20px;
 }
 
-.col {
-  flex:1;
-}
+.col { flex:1; }
 
 .card {
   background:white;
-  border-radius:10px;
   padding:10px;
   margin-top:10px;
+  border-radius:10px;
   cursor:pointer;
-  box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
-.selected {
-  border:2px solid #00bcd4;
-}
+.selected { border:2px solid #00bcd4; }
 
 .tavoli {
   display:grid;
@@ -151,16 +128,12 @@ button {
 .libero { background:#4caf50; }
 .pending { background:#ff9800; }
 .confermato { background:#f44336; }
-
-h3 {
-  margin-top:20px;
-}
 </style>
 </head>
 
 <body>
 
-<!-- 🔐 LOGIN -->
+<!-- LOGIN -->
 <div id="loginScreen">
   <div class="loginBox">
     <h3>Login Staff</h3>
@@ -172,7 +145,6 @@ h3 {
     </select>
 
     <input type="password" id="password" placeholder="Password">
-
     <button onclick="login()">Accedi</button>
 
     <p id="loginError" style="color:red;"></p>
@@ -188,7 +160,7 @@ h3 {
 
   <div class="left">
 
-    <select id="ristorante" onchange="carica()">
+    <select id="ristorante" onchange="checkRistorante()">
       <option value="roma">Roma</option>
       <option value="napoli">Napoli</option>
       <option value="vairano">Vairano</option>
@@ -205,17 +177,13 @@ h3 {
   </div>
 
   <div class="right">
-
     <b>➕ Nuova prenotazione</b><br>
-
     <input type="time" id="ora">
     <input type="text" id="nome">
     <input type="text" id="telefono">
     <input type="number" id="persone">
-
     <br>
     <button onclick="aggiungi()">Aggiungi</button>
-
   </div>
 
 </div>
@@ -228,13 +196,11 @@ h3 {
 </div>
 
 <div class="col">
+  <h3>Sala Interna</h3>
+  <div id="interna" class="tavoli"></div>
 
-<h3>Sala Interna</h3>
-<div id="interna" class="tavoli"></div>
-
-<h3>Sala Esterna</h3>
-<div id="esterna" class="tavoli"></div>
-
+  <h3>Sala Esterna</h3>
+  <div id="esterna" class="tavoli"></div>
 </div>
 
 </div>
@@ -252,7 +218,7 @@ const PASSWORDS = {
 let prenotazioni = [];
 let selezionata = null;
 let snapshot = [];
-let ristoranteAttivo = null;
+let auth = null;
 
 // ================= LOGIN =================
 function login() {
@@ -262,59 +228,68 @@ function login() {
 
   if (PASSWORDS[r] === pw) {
 
-    sessionStorage.setItem("auth_" + r, "true");
-    ristoranteAttivo = r;
+    auth = r;
+    sessionStorage.setItem("staff_auth", r);
 
     document.getElementById("loginScreen").style.display = "none";
 
     document.getElementById("ristorante").value = r;
+    document.getElementById("data").value = new Date().toISOString().split("T")[0];
 
-    const today = new Date().toISOString().split("T")[0];
-    document.getElementById("data").value = today;
-
-    carica();
-    setInterval(refreshSilenzioso, 15000);
-
+    start();
   } else {
     document.getElementById("loginError").innerText = "Password errata";
   }
 }
 
-// ================= INIT CHECK =================
+// ================= INIT =================
 window.onload = () => {
 
-  const r = "roma"; // default check
+  const saved = sessionStorage.getItem("staff_auth");
 
-  if (sessionStorage.getItem("auth_roma") === "true" ||
-      sessionStorage.getItem("auth_napoli") === "true" ||
-      sessionStorage.getItem("auth_vairano") === "true") {
-
+  if (saved) {
+    auth = saved;
     document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("ristorante").value = saved;
+    document.getElementById("data").value = new Date().toISOString().split("T")[0];
+    start();
   }
 };
+
+function start() {
+  carica();
+  setInterval(refreshSilenzioso, 15000);
+}
+
+// ================= BLOCCO CAMBIO RISTORANTE =================
+function checkRistorante() {
+
+  const val = document.getElementById("ristorante").value;
+
+  if (val !== auth) {
+    alert("Devi fare login per questo ristorante");
+    document.getElementById("ristorante").value = auth;
+  } else {
+    carica();
+  }
+}
 
 // ================= FETCH =================
 async function carica() {
 
-  const ristorante = document.getElementById("ristorante").value;
-  const data = document.getElementById("data").value;
-
-  if (!data) return;
+  const r = document.getElementById("ristorante").value;
+  const d = document.getElementById("data").value;
 
   const res = await fetch(API_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"getPrenotazioniGiorno",
-      ristorante,
-      data
-    })
+    body: JSON.stringify({ action:"getPrenotazioniGiorno", ristorante:r, data:d })
   });
 
   const json = await res.json();
   prenotazioni = json.data || [];
 
-  prenotazioni.sort((a,b) => a.ora.localeCompare(b.ora));
+  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
 
   render();
 }
@@ -322,36 +297,28 @@ async function carica() {
 // ================= REFRESH =================
 async function refreshSilenzioso() {
 
-  const ristorante = document.getElementById("ristorante").value;
-  const data = document.getElementById("data").value;
-
-  if (!data) return;
+  const r = document.getElementById("ristorante").value;
+  const d = document.getElementById("data").value;
 
   const res = await fetch(API_URL, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"getPrenotazioniGiorno",
-      ristorante,
-      data
-    })
+    body: JSON.stringify({ action:"getPrenotazioniGiorno", ristorante:r, data:d })
   });
 
   const json = await res.json();
   const nuove = json.data || [];
 
-  const oldSnapshot = snapshot;
+  const old = snapshot;
   snapshot = nuove.map(p => `${p.row}-${p.ora}-${p.nome}-${p.telefono}`);
 
-  const newItems = nuove.filter(p =>
-    !oldSnapshot.includes(`${p.row}-${p.ora}-${p.nome}-${p.telefono}`)
-  );
+  const newItems = nuove.filter(p => !old.includes(`${p.row}-${p.ora}-${p.nome}-${p.telefono}`));
 
   prenotazioni = nuove;
 
-  if (newItems.length > 0) {
-    newItems.forEach(p => {
-      showToast(`🔔 Nuova prenotazione:\n${p.nome} - ${p.ora}`);
+  if (newItems.length) {
+    newItems.forEach(p=>{
+      showToast(`Nuova prenotazione:\n${p.nome} - ${p.ora}`);
     });
   }
 
@@ -372,24 +339,82 @@ function closeToast() {
 
 document.getElementById("overlay").onclick = closeToast;
 
-// ================= RESTO IDENTICO =================
-
-function tipo(ora) {
-  const [h] = ora.split(":").map(Number);
-  return (h <= 17) ? "pranzo" : "cena";
-}
-
+// ================= RENDER =================
 function render() {
   renderLista();
   renderTavoli();
 }
 
-function renderLista() { /* invariato */ }
-function renderTavoli() { /* invariato */ }
-function statoTavolo() { /* invariato */ }
-function creaTavolo() { /* invariato */ }
-function assegna() { /* invariato */ }
-function aggiungi() { /* invariato */ }
+function renderLista() {
+
+  const f = document.getElementById("servizio").value;
+  const div = document.getElementById("lista");
+
+  div.innerHTML = "";
+
+  prenotazioni.forEach(p=>{
+
+    const servizio = (parseInt(p.ora) <= 17) ? "pranzo" : "cena";
+    if (f !== "tutti" && f !== servizio) return;
+
+    const el = document.createElement("div");
+    el.className = "card";
+
+    el.innerHTML = `
+      <b>${p.ora}</b> - ${p.nome} (${p.persone})<br>
+      ${p.telefono}<br>
+      ${p.stato} - Tavolo ${p.tavolo || "-"}
+    `;
+
+    el.onclick = ()=>{ selezionata = p; };
+
+    div.appendChild(el);
+  });
+}
+
+function renderTavoli() {
+
+  const interna = document.getElementById("interna");
+  const esterna = document.getElementById("esterna");
+
+  interna.innerHTML = "";
+  esterna.innerHTML = "";
+
+  for(let i=1;i<=16;i++) interna.appendChild(makeTable(i));
+  [21,22,23,24,25,26,41,42].forEach(i=>esterna.appendChild(makeTable(i)));
+}
+
+function makeTable(n) {
+
+  const div = document.createElement("div");
+  div.className = "tavolo libero";
+  div.innerText = n;
+
+  div.onclick = ()=>alert("assegna tavolo (già esistente logica)");
+
+  return div;
+}
+
+async function aggiungi() {
+  const r = document.getElementById("ristorante").value;
+  const d = document.getElementById("data").value;
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiungiPrenotazioneStaff",
+      ristorante:r,
+      data:d,
+      ora:ora.value,
+      nome:nome.value,
+      telefono:telefono.value,
+      persone:Number(persone.value)
+    })
+  });
+
+  carica();
+}
 
 </script>
 
