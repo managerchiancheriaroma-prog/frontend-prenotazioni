@@ -83,8 +83,24 @@ button {
 .pending { background:#ff9800; }
 .confermato { background:#f44336; }
 
-h3 {
-  margin-top:20px;
+/* 🔔 TOAST */
+#toast {
+  position:fixed;
+  top:20px;
+  right:20px;
+  background:#333;
+  color:white;
+  padding:12px 18px;
+  border-radius:8px;
+  opacity:0;
+  transform:translateY(-10px);
+  transition:0.3s;
+  z-index:9999;
+}
+
+#toast.show {
+  opacity:1;
+  transform:translateY(0);
 }
 </style>
 </head>
@@ -92,6 +108,8 @@ h3 {
 <body>
 
 <h2>Gestione Staff</h2>
+
+<div id="toast"></div>
 
 <div class="header">
 
@@ -155,18 +173,22 @@ const API_URL = "/api/proxy";
 
 let prenotazioni = [];
 let selezionata = null;
+let snapshot = [];
 
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
 
-// AUTO LOAD
+// ================= INIT =================
 window.onload = () => {
   const today = new Date().toISOString().split("T")[0];
   document.getElementById("data").value = today;
+
   carica();
+
+  setInterval(refreshSilenzioso, 15000);
 };
 
-// ================= CARICA =================
+// ================= FETCH =================
 async function carica() {
 
   const ristorante = document.getElementById("ristorante").value;
@@ -187,17 +209,69 @@ async function carica() {
   const json = await res.json();
   prenotazioni = json.data || [];
 
-  // 🔥 ORDINAMENTO ORARIO
-  prenotazioni.sort((a, b) => {
-    return a.ora.localeCompare(b.ora);
+  prenotazioni.sort((a,b) => a.ora.localeCompare(b.ora));
+
+  detectNuovePrenotazioni();
+  render();
+}
+
+// ================= REFRESH SILENZIOSO =================
+async function refreshSilenzioso() {
+  const ristorante = document.getElementById("ristorante").value;
+  const data = document.getElementById("data").value;
+
+  if (!data) return;
+
+  const res = await fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"getPrenotazioniGiorno",
+      ristorante,
+      data
+    })
   });
+
+  const json = await res.json();
+  const nuove = json.data || [];
+
+  const oldSnapshot = snapshot;
+  snapshot = nuove.map(p => key(p));
+
+  // confronto nuove prenotazioni
+  const newItems = nuove.filter(p => !oldSnapshot.includes(key(p)));
+
+  prenotazioni = nuove;
+  prenotazioni.sort((a,b) => a.ora.localeCompare(b.ora));
+
+  if (newItems.length > 0) {
+    newItems.forEach(p => {
+      showToast(`🔔 Nuova prenotazione: ${p.nome} - ${p.ora}`);
+    });
+  }
 
   render();
 }
 
+// ================= KEY UNIVOCA =================
+function key(p) {
+  return `${p.row}-${p.ora}-${p.nome}-${p.telefono}`;
+}
+
+// ================= TOAST =================
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+
+  setTimeout(() => {
+    t.classList.remove("show");
+  }, 3000);
+}
+
 // ================= SERVIZIO =================
 function tipo(ora) {
-  const [h,m] = ora.split(":").map(Number);
+  const [h] = ora.split(":").map(Number);
   return (h <= 17) ? "pranzo" : "cena";
 }
 
