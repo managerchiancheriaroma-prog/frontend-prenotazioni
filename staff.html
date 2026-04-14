@@ -50,9 +50,7 @@ body { font-family: Arial; max-width:1300px; margin:auto; padding:20px; backgrou
 
 .selected { border:2px solid #00bcd4; }
 
-.actions {
-  margin-top:8px;
-}
+.actions { margin-top:8px; }
 
 .actions button {
   margin-right:5px;
@@ -78,6 +76,7 @@ body { font-family: Arial; max-width:1300px; margin:auto; padding:20px; backgrou
 .libero { background:#4caf50; }
 .pending { background:#ff9800; }
 .confermato { background:#f44336; }
+.arrivato { background:#2196f3; } /* 🔥 blu */
 </style>
 </head>
 
@@ -296,7 +295,7 @@ function render() {
   renderTavoli();
 }
 
-// 🔥 QUI I BOTTONI
+// LISTA CON NUOVI BOTTONI
 function renderLista() {
 
   lista.innerHTML = "";
@@ -311,8 +310,10 @@ function renderLista() {
       ${p.telefono}<br>
       ${p.stato} - Tavolo ${p.tavolo || "-"}
       <div class="actions">
-        <button onclick="conferma(event, ${p.row})">✔ Conferma</button>
-        <button onclick="elimina(event, ${p.row})">🗑 Elimina</button>
+        <button onclick="conferma(event, ${p.row})">✔</button>
+        <button onclick="arrivato(event, ${p.row})">🍽 Arrivato</button>
+        <button onclick="libera(event, ${p.row})">🧹 Libera</button>
+        <button onclick="elimina(event, ${p.row})">🗑</button>
       </div>
     `;
 
@@ -329,7 +330,32 @@ function renderLista() {
 // AZIONI
 async function conferma(e, row) {
   e.stopPropagation();
+  await updateStato(row, "CONFERMATA");
+}
 
+async function arrivato(e, row) {
+  e.stopPropagation();
+  await updateStato(row, "ARRIVATO");
+}
+
+async function libera(e, row) {
+  e.stopPropagation();
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaTavolo",
+      ristorante:ristorante.value,
+      row: row,
+      tavolo: ""
+    })
+  });
+
+  await updateStato(row, "CONFERMATA");
+}
+
+async function updateStato(row, stato) {
   await fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -337,7 +363,7 @@ async function conferma(e, row) {
       action:"aggiornaStatoPrenotazione",
       ristorante:ristorante.value,
       row: row,
-      stato: "CONFERMATA"
+      stato: stato
     })
   });
 
@@ -372,17 +398,23 @@ function renderTavoli() {
 }
 
 function statoTavolo(numero) {
+
   const tav = prenotazioni.find(p => p.tavolo == numero);
+
   if (!tav) return "libero";
   if (tav.stato === "PENDING") return "pending";
+  if (tav.stato === "ARRIVATO") return "arrivato";
   return "confermato";
 }
 
 function creaTavolo(numero) {
+
   const div = document.createElement("div");
   div.className = "tavolo " + statoTavolo(numero);
   div.innerText = numero;
+
   div.onclick = () => assegna(numero);
+
   return div;
 }
 
