@@ -17,6 +17,7 @@ body {
 
 h2 { text-align:center; }
 
+/* LOGIN */
 #loginScreen {
   position:fixed; top:0; left:0; width:100%; height:100%;
   background:rgba(0,0,0,0.9);
@@ -29,6 +30,7 @@ h2 { text-align:center; }
   width:90%; max-width:320px;
 }
 
+/* HEADER */
 .header {
   display:flex;
   flex-direction:column;
@@ -41,6 +43,7 @@ h2 { text-align:center; }
   border-radius:10px;
 }
 
+/* LAYOUT */
 .container {
   display:flex;
   flex-direction:column;
@@ -54,6 +57,7 @@ h2 { text-align:center; }
   .col { width:50%; }
 }
 
+/* CARD */
 .card {
   background:white;
   padding:12px;
@@ -67,6 +71,7 @@ h2 { text-align:center; }
   border:3px solid #00bcd4;
 }
 
+/* ACTIONS */
 .actions button {
   margin:4px;
   padding:10px;
@@ -75,6 +80,7 @@ h2 { text-align:center; }
   border-radius:6px;
 }
 
+/* TAVOLI */
 .tavoli {
   display:grid;
   grid-template-columns: repeat(4, 1fr);
@@ -97,6 +103,7 @@ h2 { text-align:center; }
 .confermato { background:#f44336; }
 .arrivato { background:#2196f3; }
 
+/* TOAST */
 #overlay {
   position:fixed; top:0; left:0; width:100%; height:100%;
   background:rgba(0,0,0,0.4);
@@ -116,6 +123,7 @@ h2 { text-align:center; }
   font-size:18px;
 }
 
+/* INPUT */
 .field { margin-top:10px; }
 .field label { font-size:13px; }
 .field input {
@@ -237,13 +245,14 @@ const PASSWORDS = {
 };
 
 let prenotazioni = [];
-let selectedRow = null;
+let selezionata = null;
 let snapshot = [];
 let auth = null;
 
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
 
+/* LOGIN */
 function login() {
   const r = loginRistorante.value;
   const pw = password.value;
@@ -278,7 +287,9 @@ function start() {
   setInterval(refreshSilenzioso, 15000);
 }
 
+/* CARICA */
 async function carica() {
+
   const res = await fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -299,6 +310,7 @@ async function carica() {
   render();
 }
 
+/* REFRESH */
 async function refreshSilenzioso() {
 
   const res = await fetch(API_URL,{
@@ -326,6 +338,7 @@ async function refreshSilenzioso() {
   render();
 }
 
+/* TOAST */
 function showToast(msg){
   toast.innerText = msg;
   toast.style.display="block";
@@ -337,12 +350,20 @@ function closeToast(){
   overlay.style.display="none";
 }
 
+/* RENDER */
 function render(){
   renderLista();
   renderTavoli();
 }
 
-/* LISTA — FIX SOLO SELEZIONE ROBUSTA */
+/* FIX SELEZIONE DEFINITIVO */
+function selectRow(row){
+  selezionata = null;
+  selezionata = prenotazioni.find(p => p.row === row) || null;
+  render();
+}
+
+/* LISTA - SOLO FIX CLICK */
 function renderLista(){
 
   lista.innerHTML="";
@@ -352,21 +373,44 @@ function renderLista(){
     const el=document.createElement("div");
     el.className="card";
 
-    if (p.row === selectedRow) {
+    if (selezionata && selezionata.row === p.row) {
       el.classList.add("selected");
     }
 
+    el.onclick = () => selectRow(p.row);
+
+    const statoColor =
+      p.stato==="PENDING" ? "#ff9800" :
+      p.stato==="ARRIVATO" ? "#2196f3" :
+      "#f44336";
+
     el.innerHTML=`
-      <div onclick="selectRow(${p.row})">
-        <b>${p.nome}</b> - ${p.ora}<br>
-        👥 ${p.persone} | Tavolo ${p.tavolo||"-"}
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:18px; font-weight:bold;">
+          ${p.nome}
+        </div>
+        <div style="font-size:16px;">
+          ${p.ora}
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; margin-top:6px;">
+        <div>👥 ${p.persone}</div>
+        <div>🍽 Tavolo ${p.tavolo || "-"}</div>
+      </div>
+
+      <div style="margin-top:8px;">
+        <span style="padding:4px 10px; border-radius:20px; color:white; background:${statoColor}; font-size:12px;">
+          ${p.stato}
+        </span>
       </div>
 
       <div class="actions">
-        <button onclick="conferma(event,${p.row})">✔</button>
-        <button onclick="arrivato(event,${p.row})">🍽</button>
-        <button onclick="libera(event,${p.row})">🧹</button>
-        <button onclick="elimina(event,${p.row})">🗑</button>
+        <button onclick="conferma(event,${p.row})">✔ Conferma</button>
+        <button onclick="arrivato(event,${p.row})">🍽 Arrivato</button>
+        <button onclick="libera(event,${p.row})">🧹 Libera</button>
+        <button onclick="elimina(event,${p.row})">🗑 Elimina</button>
       </div>
     `;
 
@@ -374,12 +418,7 @@ function renderLista(){
   });
 }
 
-/* SELEZIONE STABILE */
-function selectRow(row){
-  selectedRow = row;
-  render();
-}
-
+/* TAVOLI INVARIATI */
 function renderTavoli(){
 
   interna.innerHTML="";
@@ -390,10 +429,12 @@ function renderTavoli(){
 }
 
 function statoTavolo(n){
-  const t = prenotazioni.find(p=>p.tavolo==n);
-  if(!t) return "libero";
-  if(t.stato==="PENDING") return "pending";
-  if(t.stato==="ARRIVATO") return "arrivato";
+
+  const t = prenotazioni.find(p => p.tavolo == n);
+
+  if (!t) return "libero";
+  if (t.stato === "PENDING") return "pending";
+  if (t.stato === "ARRIVATO") return "arrivato";
   return "confermato";
 }
 
@@ -407,7 +448,7 @@ function creaTavolo(n){
 
 async function assegna(n){
 
-  if(!selectedRow){
+  if(!selezionata){
     alert("Seleziona prenotazione");
     return;
   }
@@ -418,7 +459,7 @@ async function assegna(n){
     body: JSON.stringify({
       action:"aggiornaTavolo",
       ristorante:ristorante.value,
-      row:selectedRow,
+      row:selezionata.row,
       tavolo:n
     })
   });
