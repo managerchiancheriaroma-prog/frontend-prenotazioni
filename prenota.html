@@ -5,19 +5,11 @@
 <title>Prenota</title>
 
 <style>
-body {
-  font-family: Arial;
-  padding:20px;
-  max-width:400px;
-  margin:auto;
-}
+body { font-family: Arial; padding:20px; max-width:400px; margin:auto; }
 
-label {
-  display:block;
-  margin-top:15px;
-}
+label { display:block; margin-top:15px; }
 
-input, select, button {
+input, button {
   width:100%;
   padding:10px;
   margin-top:5px;
@@ -29,7 +21,6 @@ button {
   color:white;
   border:none;
   border-radius:6px;
-  font-size:16px;
 }
 
 #messaggio {
@@ -38,14 +29,11 @@ button {
   padding:15px;
   border-radius:6px;
   text-align:center;
-  font-weight:bold;
 }
 
 .ok { background:#d4edda; }
 .error { background:#f8d7da; }
-
 </style>
-
 </head>
 
 <body>
@@ -79,57 +67,48 @@ button {
 
 const API_URL = "/api/proxy";
 
-// 🔥 prende ristorante dall’URL
 const params = new URLSearchParams(window.location.search);
 const ristorante = params.get("ristorante");
 
-// sicurezza base
-if (!ristorante) {
-  document.getElementById("titolo").innerText = "Ristorante non valido";
-} else {
-  document.getElementById("titolo").innerText = "Prenota – " + ristorante;
-}
+titolo.innerText = ristorante ? "Prenota – " + ristorante : "Errore";
 
 async function prenota() {
 
   const dati = {
-    action: "prenota",
-    ristorante: ristorante,   // ✅ FIX FONDAMENTALE
-    data: document.getElementById("data").value,
-    ora: document.getElementById("ora").value,
-    nome: document.getElementById("nome").value,
-    telefono: document.getElementById("telefono").value,
-    persone: Number(document.getElementById("persone").value)
+    action:"prenota",
+    ristorante,
+    data:data.value,
+    ora:ora.value,
+    nome:nome.value,
+    telefono:telefono.value,
+    persone:Number(persone.value)
   };
 
-  try {
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(dati)
+  });
 
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(dati)
-    });
+  const json = await res.json();
 
-    const json = await res.json();
+  messaggio.style.display = "block";
 
-    let box = document.getElementById("messaggio");
+  if (json.success) {
 
-    if (json.success) {
-      box.className = "ok";
-      box.innerHTML = "✅ Prenotazione " + json.stato;
+    messaggio.className = "ok";
+
+    if (json.stato === "CONFERMATA") {
+      messaggio.innerHTML = "✅ Prenotazione confermata ti aspettiamo";
     } else {
-      box.className = "error";
-      box.innerHTML = "Errore: " + json.errore;
+      messaggio.innerHTML = "⏳ a breve ti contatteremo per confermarti la prenotazione";
     }
 
-    box.style.display = "block";
-    document.getElementById("form").reset();
+    form.reset();
 
-  } catch (e) {
-    alert("Errore connessione");
-    console.error(e);
+  } else {
+    messaggio.className = "error";
+    messaggio.innerHTML = "Errore: " + json.errore;
   }
 }
 
