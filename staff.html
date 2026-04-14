@@ -356,14 +356,7 @@ function render(){
   renderTavoli();
 }
 
-/* FIX SELEZIONE DEFINITIVO */
-function selectRow(row){
-  selezionata = null;
-  selezionata = prenotazioni.find(p => p.row === row) || null;
-  render();
-}
-
-/* LISTA - SOLO FIX CLICK */
+/* LISTA */
 function renderLista(){
 
   lista.innerHTML="";
@@ -385,26 +378,12 @@ function renderLista(){
       "#f44336";
 
     el.innerHTML=`
-
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="font-size:18px; font-weight:bold;">
-          ${p.nome}
-        </div>
-        <div style="font-size:16px;">
-          ${p.ora}
-        </div>
+      <div style="display:flex; justify-content:space-between;">
+        <b>${p.nome}</b>
+        <span>${p.ora}</span>
       </div>
 
-      <div style="display:flex; justify-content:space-between; margin-top:6px;">
-        <div>👥 ${p.persone}</div>
-        <div>🍽 Tavolo ${p.tavolo || "-"}</div>
-      </div>
-
-      <div style="margin-top:8px;">
-        <span style="padding:4px 10px; border-radius:20px; color:white; background:${statoColor}; font-size:12px;">
-          ${p.stato}
-        </span>
-      </div>
+      <div>👥 ${p.persone} | 🍽 Tavolo ${p.tavolo || "-"}</div>
 
       <div class="actions">
         <button onclick="conferma(event,${p.row})">✔ Conferma</button>
@@ -418,20 +397,22 @@ function renderLista(){
   });
 }
 
-/* TAVOLI INVARIATI */
-function renderTavoli(){
+/* SELEZIONE */
+function selectRow(row){
+  selezionata = prenotazioni.find(p => p.row === row) || null;
+  render();
+}
 
+/* TAVOLI */
+function renderTavoli(){
   interna.innerHTML="";
   esterna.innerHTML="";
-
   tavoliInterna.forEach(t=>interna.appendChild(creaTavolo(t)));
   tavoliEsterna.forEach(t=>esterna.appendChild(creaTavolo(t)));
 }
 
 function statoTavolo(n){
-
   const t = prenotazioni.find(p => p.tavolo == n);
-
   if (!t) return "libero";
   if (t.stato === "PENDING") return "pending";
   if (t.stato === "ARRIVATO") return "arrivato";
@@ -447,11 +428,7 @@ function creaTavolo(n){
 }
 
 async function assegna(n){
-
-  if(!selezionata){
-    alert("Seleziona prenotazione");
-    return;
-  }
+  if(!selezionata){ alert("Seleziona prenotazione"); return; }
 
   await fetch(API_URL,{
     method:"POST",
@@ -464,6 +441,51 @@ async function assegna(n){
     })
   });
 
+  carica();
+}
+
+/* ================= FUNZIONI MANCANTI (FIX) ================= */
+
+async function conferma(e,row){
+  e.stopPropagation();
+  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    action:"aggiornaStatoPrenotazione",
+    ristorante:ristorante.value,
+    row,
+    stato:"CONFERMATA"
+  })});
+  carica();
+}
+
+async function arrivato(e,row){
+  e.stopPropagation();
+  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    action:"aggiornaStatoPrenotazione",
+    ristorante:ristorante.value,
+    row,
+    stato:"ARRIVATO"
+  })});
+  carica();
+}
+
+async function libera(e,row){
+  e.stopPropagation();
+  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    action:"aggiornaTavolo",
+    ristorante:ristorante.value,
+    row,
+    tavolo:""
+  })});
+  carica();
+}
+
+async function elimina(e,row){
+  e.stopPropagation();
+  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    action:"eliminaPrenotazione",
+    ristorante:ristorante.value,
+    row
+  })});
   carica();
 }
 
