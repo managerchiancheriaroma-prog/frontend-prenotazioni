@@ -140,6 +140,27 @@ button {
   color:white;
 }
 
+/* ===================== FIX UI TAVOLO ===================== */
+.row-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.row-bottom {
+  display:flex;
+  justify-content:space-between;
+  margin-top:6px;
+  font-size:13px;
+  opacity:0.9;
+}
+
+.tavolo-right {
+  font-weight:bold;
+  min-width:70px;
+  text-align:right;
+}
+
 </style>
 </head>
 
@@ -310,7 +331,7 @@ async function carica() {
   render();
 }
 
-/* REFRESH */
+/* REFRESH (OTTIMIZZATO LEGGERO) */
 async function refreshSilenzioso() {
 
   const res = await fetch(API_URL,{
@@ -356,7 +377,7 @@ function render(){
   renderTavoli();
 }
 
-/* LISTA */
+/* LISTA (SOLO UI MODIFICATA TAVOLO A DESTRA) */
 function renderLista(){
 
   lista.innerHTML="";
@@ -378,12 +399,15 @@ function renderLista(){
       "#f44336";
 
     el.innerHTML=`
-      <div style="display:flex; justify-content:space-between;">
+      <div class="row-top">
         <b>${p.nome}</b>
         <span>${p.ora}</span>
       </div>
 
-      <div>👥 ${p.persone} | 🍽 Tavolo ${p.tavolo || "-"}</div>
+      <div class="row-bottom">
+        <div>👥 ${p.persone}</div>
+        <div class="tavolo-right">🍽 ${p.tavolo || "-"}</div>
+      </div>
 
       <div class="actions">
         <button onclick="conferma(event,${p.row})">✔ Conferma</button>
@@ -444,8 +468,7 @@ async function assegna(n){
   carica();
 }
 
-/* ================= FUNZIONI MANCANTI (FIX) ================= */
-
+/* FUNZIONI ORIGINALI */
 async function conferma(e,row){
   e.stopPropagation();
   await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
