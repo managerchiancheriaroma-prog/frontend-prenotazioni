@@ -41,11 +41,24 @@ body { font-family: Arial; max-width:1300px; margin:auto; padding:20px; backgrou
 .col { flex:1; }
 
 .card {
-  background:white; padding:10px; margin-top:10px;
-  border-radius:10px; cursor:pointer;
+  background:white;
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
+  cursor:pointer;
 }
 
 .selected { border:2px solid #00bcd4; }
+
+.actions {
+  margin-top:8px;
+}
+
+.actions button {
+  margin-right:5px;
+  padding:5px 8px;
+  font-size:12px;
+}
 
 .tavoli {
   display:grid;
@@ -218,7 +231,7 @@ async function carica() {
   const json = await res.json();
   prenotazioni = json.data || [];
 
-  snapshot = prenotazioni.map(p => key(p)); // 🔥 FIX
+  snapshot = prenotazioni.map(p => key(p));
 
   prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
 
@@ -246,8 +259,7 @@ async function refreshSilenzioso() {
 
   const newItems = nuove.filter(p => !old.includes(key(p)));
 
-  snapshot = newSnap; // 🔥 FIX
-
+  snapshot = newSnap;
   prenotazioni = nuove;
   prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
 
@@ -284,6 +296,7 @@ function render() {
   renderTavoli();
 }
 
+// 🔥 QUI I BOTTONI
 function renderLista() {
 
   lista.innerHTML = "";
@@ -297,6 +310,10 @@ function renderLista() {
       <b>${p.ora}</b> - ${p.nome} (${p.persone})<br>
       ${p.telefono}<br>
       ${p.stato} - Tavolo ${p.tavolo || "-"}
+      <div class="actions">
+        <button onclick="conferma(event, ${p.row})">✔ Conferma</button>
+        <button onclick="elimina(event, ${p.row})">🗑 Elimina</button>
+      </div>
     `;
 
     el.onclick = ()=>{
@@ -309,8 +326,44 @@ function renderLista() {
   });
 }
 
-function renderTavoli() {
+// AZIONI
+async function conferma(e, row) {
+  e.stopPropagation();
 
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaStatoPrenotazione",
+      ristorante:ristorante.value,
+      row: row,
+      stato: "CONFERMATA"
+    })
+  });
+
+  carica();
+}
+
+async function elimina(e, row) {
+  e.stopPropagation();
+
+  if (!confirm("Eliminare prenotazione?")) return;
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"eliminaPrenotazione",
+      ristorante:ristorante.value,
+      row: row
+    })
+  });
+
+  carica();
+}
+
+// TAVOLI
+function renderTavoli() {
   interna.innerHTML = "";
   esterna.innerHTML = "";
 
@@ -319,26 +372,20 @@ function renderTavoli() {
 }
 
 function statoTavolo(numero) {
-
   const tav = prenotazioni.find(p => p.tavolo == numero);
-
   if (!tav) return "libero";
   if (tav.stato === "PENDING") return "pending";
   return "confermato";
 }
 
 function creaTavolo(numero) {
-
   const div = document.createElement("div");
   div.className = "tavolo " + statoTavolo(numero);
   div.innerText = numero;
-
   div.onclick = () => assegna(numero);
-
   return div;
 }
 
-// 🔥 FIX ASSEGNA
 async function assegna(numero) {
 
   if (!selezionata) {
