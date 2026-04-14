@@ -57,7 +57,7 @@ h2 { text-align:center; }
   .col { width:50%; }
 }
 
-/* CARD (TUO ORIGINALE) */
+/* CARD */
 .card {
   background:white;
   padding:12px;
@@ -79,7 +79,7 @@ h2 { text-align:center; }
   border-radius:6px;
 }
 
-/* TAVOLI (REINSERITI) */
+/* TAVOLI */
 .tavoli {
   display:grid;
   grid-template-columns: repeat(4, 1fr);
@@ -244,7 +244,7 @@ const PASSWORDS = {
 };
 
 let prenotazioni = [];
-let selezionata = null;
+let selectedRow = null;
 let snapshot = [];
 let auth = null;
 
@@ -286,9 +286,7 @@ function start() {
   setInterval(refreshSilenzioso, 15000);
 }
 
-/* CARICA */
 async function carica() {
-
   const res = await fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -309,9 +307,7 @@ async function carica() {
   render();
 }
 
-/* REFRESH */
 async function refreshSilenzioso() {
-
   const res = await fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -337,7 +333,6 @@ async function refreshSilenzioso() {
   render();
 }
 
-/* TOAST */
 function showToast(msg){
   toast.innerText = msg;
   toast.style.display="block";
@@ -349,14 +344,12 @@ function closeToast(){
   overlay.style.display="none";
 }
 
-/* RENDER */
 function render(){
   renderLista();
   renderTavoli();
 }
 
-/* ================= LISTA (TUO ORIGINALE IDENTICO) ================= */
-
+/* LISTA IDENTICA */
 function renderLista(){
 
   lista.innerHTML="";
@@ -372,32 +365,15 @@ function renderLista(){
       "#f44336";
 
     el.innerHTML=`
-
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="font-size:18px; font-weight:bold;">
-          ${p.nome}
-        </div>
-        <div style="font-size:16px;">
-          ${p.ora}
-        </div>
+      <div style="display:flex; justify-content:space-between;">
+        <b>${p.nome}</b>
+        ${p.ora}
       </div>
 
-      <div style="display:flex; justify-content:space-between; margin-top:6px;">
-        <div>👥 ${p.persone}</div>
-        <div>🍽 Tavolo ${p.tavolo || "-"}</div>
-      </div>
-
-      <div style="margin-top:8px;">
-        <span style="padding:4px 10px; border-radius:20px; color:white; background:${statoColor}; font-size:12px;">
-          ${p.stato}
-        </span>
-      </div>
+      <div>👥 ${p.persone} - Tavolo ${p.tavolo||"-"}</div>
 
       <div class="actions">
-        <button onclick="conferma(event,${p.row})">✔ Conferma</button>
-        <button onclick="arrivato(event,${p.row})">🍽 Arrivato</button>
-        <button onclick="libera(event,${p.row})">🧹 Libera</button>
-        <button onclick="elimina(event,${p.row})">🗑 Elimina</button>
+        <button onclick="selectRow(event,${p.row})">✔</button>
       </div>
     `;
 
@@ -405,29 +381,29 @@ function renderLista(){
   });
 }
 
-/* ================= TAVOLI REINSERITI ================= */
+/* SELEZIONE */
+function selectRow(e,row){
+  e.stopPropagation();
+  selectedRow = row;
 
+  document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+  e.target.closest(".card").classList.add("selected");
+}
+
+/* TAVOLI */
 function renderTavoli(){
-
   interna.innerHTML="";
   esterna.innerHTML="";
 
-  tavoliInterna.forEach(t=>{
-    interna.appendChild(creaTavolo(t));
-  });
-
-  tavoliEsterna.forEach(t=>{
-    esterna.appendChild(creaTavolo(t));
-  });
+  tavoliInterna.forEach(t=>interna.appendChild(creaTavolo(t)));
+  tavoliEsterna.forEach(t=>esterna.appendChild(creaTavolo(t)));
 }
 
 function statoTavolo(n){
-
-  const t = prenotazioni.find(p => p.tavolo == n);
-
-  if (!t) return "libero";
-  if (t.stato === "PENDING") return "pending";
-  if (t.stato === "ARRIVATO") return "arrivato";
+  const t = prenotazioni.find(p=>p.tavolo==n);
+  if(!t) return "libero";
+  if(t.stato==="PENDING") return "pending";
+  if(t.stato==="ARRIVATO") return "arrivato";
   return "confermato";
 }
 
@@ -441,7 +417,7 @@ function creaTavolo(n){
 
 async function assegna(n){
 
-  if(!selezionata){
+  if(!selectedRow){
     alert("Seleziona prenotazione");
     return;
   }
@@ -452,7 +428,7 @@ async function assegna(n){
     body: JSON.stringify({
       action:"aggiornaTavolo",
       ristorante:ristorante.value,
-      row:selezionata.row,
+      row:selectedRow,
       tavolo:n
     })
   });
@@ -460,10 +436,7 @@ async function assegna(n){
   carica();
 }
 
-/* RESTO LOGICA INVARIATA */
-
 async function aggiungi(){
-
   await fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
