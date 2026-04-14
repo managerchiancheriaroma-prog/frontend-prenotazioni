@@ -4,8 +4,16 @@
 <meta charset="UTF-8">
 <title>Staff</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body { font-family: Arial; margin:0; padding:10px; background:#f5f5f5; }
+
+body {
+  font-family: Arial;
+  margin:0;
+  padding:10px;
+  background:#f5f5f5;
+}
 
 h2 { text-align:center; }
 
@@ -19,11 +27,7 @@ h2 { text-align:center; }
 
 .loginBox {
   background:white; padding:25px; border-radius:10px;
-  width:90%; max-width:300px;
-}
-
-.loginBox input, .loginBox select, .loginBox button {
-  width:100%; padding:10px; margin-top:10px;
+  width:90%; max-width:320px;
 }
 
 /* HEADER */
@@ -39,7 +43,7 @@ h2 { text-align:center; }
   border-radius:10px;
 }
 
-/* MOBILE FIRST */
+/* LAYOUT */
 .container {
   display:flex;
   flex-direction:column;
@@ -50,34 +54,52 @@ h2 { text-align:center; }
   width:100%;
 }
 
+/* TABLET MODE */
+@media (min-width: 768px) {
+  .container {
+    flex-direction:row;
+  }
+
+  .col {
+    width:50%;
+  }
+}
+
 /* CARD */
 .card {
   background:white;
-  padding:10px;
+  padding:12px;
   margin-top:10px;
-  border-radius:10px;
+  border-radius:12px;
+  font-size:14px;
 }
 
-.selected { border:2px solid #00bcd4; }
+.selected {
+  border:3px solid #00bcd4;
+}
 
+/* BUTTONS TOUCH */
 .actions button {
-  margin:3px;
-  padding:6px;
-  font-size:11px;
+  margin:4px;
+  padding:10px;
+  font-size:14px;
+  border:none;
+  border-radius:6px;
 }
 
 /* TAVOLI */
 .tavoli {
   display:grid;
   grid-template-columns: repeat(4, 1fr);
-  gap:8px;
+  gap:10px;
 }
 
 .tavolo {
-  padding:15px;
-  border-radius:8px;
+  padding:20px;
+  border-radius:10px;
   text-align:center;
   color:white;
+  font-size:18px;
   font-weight:bold;
 }
 
@@ -99,22 +121,35 @@ h2 { text-align:center; }
   transform:translate(-50%,-50%);
   background:#333;
   color:white;
-  padding:20px;
-  border-radius:10px;
+  padding:25px;
+  border-radius:12px;
   display:none;
   text-align:center;
+  font-size:18px;
 }
 
-/* CAMPI */
-.field { margin-top:8px; }
-.field label { font-size:12px; }
-.field input { width:100%; padding:8px; }
+/* INPUT */
+.field { margin-top:10px; }
+.field label { font-size:13px; }
+.field input {
+  width:100%;
+  padding:10px;
+  font-size:16px;
+}
+
+button {
+  padding:12px;
+  font-size:16px;
+  margin-top:10px;
+  background:#333;
+  color:white;
+}
+
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="loginScreen">
   <div class="loginBox">
     <h3>Login Staff</h3>
@@ -204,6 +239,8 @@ h2 { text-align:center; }
 
 <script>
 
+/* IDENTICO LOGICA PRECEDENTE - NON TOCCATA */
+
 const API_URL = "/api/proxy";
 
 const PASSWORDS = {
@@ -220,7 +257,6 @@ let auth = null;
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
 
-/* LOGIN */
 function login() {
   const r = loginRistorante.value;
   const pw = password.value;
@@ -264,9 +300,7 @@ function checkRistorante() {
   }
 }
 
-/* FETCH */
 async function carica() {
-
   const res = await fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -287,7 +321,6 @@ async function carica() {
   render();
 }
 
-/* REFRESH */
 async function refreshSilenzioso() {
 
   const res = await fetch(API_URL,{
@@ -305,9 +338,7 @@ async function refreshSilenzioso() {
 
   const nuovi = nuove.filter(p => !snapshot.includes(p.row));
 
-  if (nuovi.length) {
-    showToast("Nuova prenotazione");
-  }
+  if (nuovi.length) showToast("Nuova prenotazione");
 
   prenotazioni = nuove;
   snapshot = nuove.map(p=>p.row);
@@ -317,7 +348,6 @@ async function refreshSilenzioso() {
   render();
 }
 
-/* TOAST */
 function showToast(msg){
   toast.innerText = msg;
   toast.style.display="block";
@@ -329,13 +359,11 @@ function closeToast(){
   overlay.style.display="none";
 }
 
-/* RENDER */
 function render(){
   renderLista();
   renderTavoli();
 }
 
-/* LISTA */
 function renderLista(){
 
   lista.innerHTML="";
@@ -366,7 +394,6 @@ function renderLista(){
   });
 }
 
-/* AZIONI */
 async function conferma(e,row){ e.stopPropagation(); await updateStato(row,"CONFERMATA"); }
 async function arrivato(e,row){ e.stopPropagation(); await updateStato(row,"ARRIVATO"); }
 
@@ -403,7 +430,6 @@ async function updateStato(row,stato){
 
 async function elimina(e,row){
   e.stopPropagation();
-
   if(!confirm("Eliminare?")) return;
 
   await fetch(API_URL,{
@@ -419,7 +445,6 @@ async function elimina(e,row){
   carica();
 }
 
-/* TAVOLI */
 function renderTavoli(){
   interna.innerHTML="";
   esterna.innerHTML="";
@@ -445,7 +470,6 @@ function creaTavolo(n){
 }
 
 async function assegna(n){
-
   if(!selezionata){
     alert("Seleziona prenotazione");
     return;
@@ -465,7 +489,6 @@ async function assegna(n){
   carica();
 }
 
-/* AGGIUNGI */
 async function aggiungi(){
   await fetch(API_URL,{
     method:"POST",
