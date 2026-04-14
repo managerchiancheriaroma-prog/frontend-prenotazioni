@@ -5,72 +5,80 @@
 <title>Staff</title>
 
 <style>
-body { font-family: Arial; max-width:1300px; margin:auto; padding:20px; background:#f5f5f5; }
+body { font-family: Arial; margin:0; padding:10px; background:#f5f5f5; }
 
+h2 { text-align:center; }
+
+/* LOGIN */
 #loginScreen {
   position:fixed; top:0; left:0; width:100%; height:100%;
-  background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center; z-index:10000;
+  background:rgba(0,0,0,0.9);
+  display:flex; justify-content:center; align-items:center;
+  z-index:10000;
 }
 
-.loginBox { background:white; padding:30px; border-radius:10px; text-align:center; width:300px; }
-
-.loginBox input, .loginBox select { width:100%; padding:10px; margin-top:10px; }
-
-.loginBox button {
-  width:100%; padding:10px; margin-top:15px;
-  background:#333; color:white; border:none; border-radius:6px;
+.loginBox {
+  background:white; padding:25px; border-radius:10px;
+  width:90%; max-width:300px;
 }
 
-#overlay {
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  background:rgba(0,0,0,0.4); display:none; z-index:9998;
+.loginBox input, .loginBox select, .loginBox button {
+  width:100%; padding:10px; margin-top:10px;
 }
 
-#toast {
-  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-  background:#333; color:white; padding:25px; border-radius:12px;
-  display:none; z-index:9999; text-align:center; cursor:pointer;
+/* HEADER */
+.header {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
-.header { display:flex; justify-content:space-between; gap:20px; }
+.left, .right {
+  background:white;
+  padding:10px;
+  border-radius:10px;
+}
 
-.left, .right { background:white; padding:15px; border-radius:10px; }
+/* MOBILE FIRST */
+.container {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
 
-.container { display:flex; gap:20px; margin-top:20px; }
+.col {
+  width:100%;
+}
 
-.col { flex:1; }
-
+/* CARD */
 .card {
   background:white;
   padding:10px;
   margin-top:10px;
   border-radius:10px;
-  cursor:pointer;
 }
 
 .selected { border:2px solid #00bcd4; }
 
-.actions { margin-top:8px; }
-
 .actions button {
-  margin-right:5px;
-  padding:5px 8px;
-  font-size:12px;
+  margin:3px;
+  padding:6px;
+  font-size:11px;
 }
 
+/* TAVOLI */
 .tavoli {
   display:grid;
   grid-template-columns: repeat(4, 1fr);
-  gap:10px;
+  gap:8px;
 }
 
 .tavolo {
   padding:15px;
-  border-radius:10px;
+  border-radius:8px;
   text-align:center;
   color:white;
   font-weight:bold;
-  cursor:pointer;
 }
 
 .libero { background:#4caf50; }
@@ -78,14 +86,35 @@ body { font-family: Arial; max-width:1300px; margin:auto; padding:20px; backgrou
 .confermato { background:#f44336; }
 .arrivato { background:#2196f3; }
 
-.field { margin-top:10px; }
-.field label { font-size:12px; color:#666; }
-.field input { width:100%; padding:8px; margin-top:3px; }
+/* TOAST */
+#overlay {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.4);
+  display:none;
+}
+
+#toast {
+  position:fixed;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  background:#333;
+  color:white;
+  padding:20px;
+  border-radius:10px;
+  display:none;
+  text-align:center;
+}
+
+/* CAMPI */
+.field { margin-top:8px; }
+.field label { font-size:12px; }
+.field input { width:100%; padding:8px; }
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div id="loginScreen">
   <div class="loginBox">
     <h3>Login Staff</h3>
@@ -103,72 +132,72 @@ body { font-family: Arial; max-width:1300px; margin:auto; padding:20px; backgrou
   </div>
 </div>
 
-<div id="overlay"></div>
+<div id="overlay" onclick="closeToast()"></div>
 <div id="toast" onclick="closeToast()"></div>
 
 <h2>Gestione Staff</h2>
 
 <div class="header">
 
-  <div class="left">
-    <select id="ristorante" onchange="checkRistorante()">
-      <option value="roma">Roma</option>
-      <option value="napoli">Napoli</option>
-      <option value="vairano">Vairano</option>
-    </select>
+<div class="left">
+<select id="ristorante" onchange="checkRistorante()">
+<option value="roma">Roma</option>
+<option value="napoli">Napoli</option>
+<option value="vairano">Vairano</option>
+</select>
 
-    <input type="date" id="data" onchange="carica()">
+<input type="date" id="data" onchange="carica()">
 
-    <select id="servizio" onchange="render()">
-      <option value="tutti">Tutti</option>
-      <option value="pranzo">Pranzo</option>
-      <option value="cena">Cena</option>
-    </select>
-  </div>
+<select id="servizio" onchange="render()">
+<option value="tutti">Tutti</option>
+<option value="pranzo">Pranzo</option>
+<option value="cena">Cena</option>
+</select>
+</div>
 
-  <div class="right">
+<div class="right">
 
-    <b>➕ Nuova prenotazione</b>
+<b>➕ Nuova prenotazione</b>
 
-    <div class="field">
-      <label>Ora</label>
-      <input type="time" id="ora">
-    </div>
+<div class="field">
+<label>Ora</label>
+<input type="time" id="ora">
+</div>
 
-    <div class="field">
-      <label>Nome cliente</label>
-      <input type="text" id="nome" placeholder="Mario Rossi">
-    </div>
+<div class="field">
+<label>Nome cliente</label>
+<input type="text" id="nome">
+</div>
 
-    <div class="field">
-      <label>Telefono</label>
-      <input type="text" id="telefono" placeholder="3331234567">
-    </div>
+<div class="field">
+<label>Telefono</label>
+<input type="text" id="telefono">
+</div>
 
-    <div class="field">
-      <label>Numero persone</label>
-      <input type="number" id="persone" placeholder="Es. 4">
-    </div>
+<div class="field">
+<label>Numero persone</label>
+<input type="number" id="persone">
+</div>
 
-    <button onclick="aggiungi()">Aggiungi</button>
+<button onclick="aggiungi()">Aggiungi</button>
 
-  </div>
+</div>
 
 </div>
 
 <div class="container">
 
 <div class="col">
-  <h3>Prenotazioni</h3>
-  <div id="lista"></div>
+<h3>Prenotazioni</h3>
+<div id="lista"></div>
 </div>
 
 <div class="col">
-  <h3>Sala Interna</h3>
-  <div id="interna" class="tavoli"></div>
+<h3>Sala Interna</h3>
+<div id="interna" class="tavoli"></div>
 
-  <h3>Sala Esterna</h3>
-  <div id="esterna" class="tavoli"></div>
+<h3>Sala Esterna</h3>
+<div id="esterna" class="tavoli"></div>
 </div>
 
 </div>
@@ -188,33 +217,35 @@ let selezionata = null;
 let snapshot = [];
 let auth = null;
 
-// LOGIN
+const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
+const tavoliEsterna = [21,22,23,24,25,26,41,42];
+
+/* LOGIN */
 function login() {
-  const r = document.getElementById("loginRistorante").value;
-  const pw = document.getElementById("password").value;
+  const r = loginRistorante.value;
+  const pw = password.value;
 
   if (PASSWORDS[r] === pw) {
     auth = r;
     sessionStorage.setItem("staff_auth", r);
+    loginScreen.style.display = "none";
 
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("ristorante").value = r;
-    document.getElementById("data").value = new Date().toISOString().split("T")[0];
+    ristorante.value = r;
+    data.value = new Date().toISOString().split("T")[0];
 
     start();
   } else {
-    document.getElementById("loginError").innerText = "Password errata";
+    loginError.innerText = "Password errata";
   }
 }
 
-// INIT
 window.onload = () => {
   const saved = sessionStorage.getItem("staff_auth");
   if (saved) {
     auth = saved;
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("ristorante").value = saved;
-    document.getElementById("data").value = new Date().toISOString().split("T")[0];
+    loginScreen.style.display = "none";
+    ristorante.value = saved;
+    data.value = new Date().toISOString().split("T")[0];
     start();
   }
 };
@@ -225,37 +256,233 @@ function start() {
 }
 
 function checkRistorante() {
-  if (document.getElementById("ristorante").value !== auth) {
-    alert("Devi fare login per questo ristorante");
-    document.getElementById("ristorante").value = auth;
+  if (ristorante.value !== auth) {
+    alert("Accesso negato");
+    ristorante.value = auth;
   } else {
     carica();
   }
 }
 
+/* FETCH */
 async function carica() {
+
   const res = await fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
       action:"getPrenotazioniGiorno",
-      ristorante:document.getElementById("ristorante").value,
-      data:document.getElementById("data").value
+      ristorante:ristorante.value,
+      data:data.value
     })
   });
 
   const json = await res.json();
   prenotazioni = json.data || [];
+
+  snapshot = prenotazioni.map(p => p.row);
+
+  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
+
   render();
 }
 
-async function refreshSilenzioso() { carica(); }
+/* REFRESH */
+async function refreshSilenzioso() {
 
-function render() {
-  document.getElementById("lista").innerHTML = JSON.stringify(prenotazioni);
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"getPrenotazioniGiorno",
+      ristorante:ristorante.value,
+      data:data.value
+    })
+  });
+
+  const json = await res.json();
+  const nuove = json.data || [];
+
+  const nuovi = nuove.filter(p => !snapshot.includes(p.row));
+
+  if (nuovi.length) {
+    showToast("Nuova prenotazione");
+  }
+
+  prenotazioni = nuove;
+  snapshot = nuove.map(p=>p.row);
+
+  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
+
+  render();
 }
 
-function aggiungi() {}
+/* TOAST */
+function showToast(msg){
+  toast.innerText = msg;
+  toast.style.display="block";
+  overlay.style.display="block";
+}
+
+function closeToast(){
+  toast.style.display="none";
+  overlay.style.display="none";
+}
+
+/* RENDER */
+function render(){
+  renderLista();
+  renderTavoli();
+}
+
+/* LISTA */
+function renderLista(){
+
+  lista.innerHTML="";
+
+  prenotazioni.forEach(p=>{
+
+    const el=document.createElement("div");
+    el.className="card";
+
+    el.innerHTML=`
+      <b>${p.ora}</b> ${p.nome} (${p.persone})<br>
+      ${p.stato} - Tavolo ${p.tavolo||"-"}
+      <div class="actions">
+        <button onclick="conferma(event,${p.row})">✔</button>
+        <button onclick="arrivato(event,${p.row})">🍽</button>
+        <button onclick="libera(event,${p.row})">🧹</button>
+        <button onclick="elimina(event,${p.row})">🗑</button>
+      </div>
+    `;
+
+    el.onclick=()=>{
+      selezionata=p;
+      document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+      el.classList.add("selected");
+    };
+
+    lista.appendChild(el);
+  });
+}
+
+/* AZIONI */
+async function conferma(e,row){ e.stopPropagation(); await updateStato(row,"CONFERMATA"); }
+async function arrivato(e,row){ e.stopPropagation(); await updateStato(row,"ARRIVATO"); }
+
+async function libera(e,row){
+  e.stopPropagation();
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaTavolo",
+      ristorante:ristorante.value,
+      row,
+      tavolo:""
+    })
+  });
+
+  await updateStato(row,"CONFERMATA");
+}
+
+async function updateStato(row,stato){
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaStatoPrenotazione",
+      ristorante:ristorante.value,
+      row,
+      stato
+    })
+  });
+  carica();
+}
+
+async function elimina(e,row){
+  e.stopPropagation();
+
+  if(!confirm("Eliminare?")) return;
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"eliminaPrenotazione",
+      ristorante:ristorante.value,
+      row
+    })
+  });
+
+  carica();
+}
+
+/* TAVOLI */
+function renderTavoli(){
+  interna.innerHTML="";
+  esterna.innerHTML="";
+
+  tavoliInterna.forEach(t=>interna.appendChild(creaTavolo(t)));
+  tavoliEsterna.forEach(t=>esterna.appendChild(creaTavolo(t)));
+}
+
+function statoTavolo(n){
+  const t=prenotazioni.find(p=>p.tavolo==n);
+  if(!t) return "libero";
+  if(t.stato==="PENDING") return "pending";
+  if(t.stato==="ARRIVATO") return "arrivato";
+  return "confermato";
+}
+
+function creaTavolo(n){
+  const d=document.createElement("div");
+  d.className="tavolo "+statoTavolo(n);
+  d.innerText=n;
+  d.onclick=()=>assegna(n);
+  return d;
+}
+
+async function assegna(n){
+
+  if(!selezionata){
+    alert("Seleziona prenotazione");
+    return;
+  }
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaTavolo",
+      ristorante:ristorante.value,
+      row:selezionata.row,
+      tavolo:n
+    })
+  });
+
+  carica();
+}
+
+/* AGGIUNGI */
+async function aggiungi(){
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiungiPrenotazioneStaff",
+      ristorante:ristorante.value,
+      data:data.value,
+      ora:ora.value,
+      nome:nome.value,
+      telefono:telefono.value,
+      persone:Number(persone.value)
+    })
+  });
+
+  carica();
+}
 
 </script>
 
