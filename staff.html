@@ -86,7 +86,7 @@ h2 { text-align:center; }
   border-radius:6px;
 }
 
-/* TAVOLI (OK) */
+/* TAVOLI */
 .tavoli {
   display:grid;
   grid-template-columns: repeat(4, 1fr);
@@ -255,8 +255,7 @@ let auth = null;
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
 
-/* ================= LOGIN ================= */
-
+/* LOGIN */
 function login() {
   const r = loginRistorante.value;
   const pw = password.value;
@@ -277,6 +276,7 @@ function login() {
 
 window.onload = () => {
   const saved = sessionStorage.getItem("staff_auth");
+
   if (saved) {
     auth = saved;
     loginScreen.style.display = "none";
@@ -300,9 +300,9 @@ function checkRistorante() {
   }
 }
 
-/* ================= CARICA ================= */
-
+/* CARICA */
 async function carica() {
+
   const res = await fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -323,8 +323,7 @@ async function carica() {
   render();
 }
 
-/* ================= REFRESH ================= */
-
+/* REFRESH */
 async function refreshSilenzioso() {
 
   const res = await fetch(API_URL,{
@@ -352,8 +351,7 @@ async function refreshSilenzioso() {
   render();
 }
 
-/* ================= TOAST ================= */
-
+/* TOAST */
 function showToast(msg){
   toast.innerText = msg;
   toast.style.display="block";
@@ -365,15 +363,13 @@ function closeToast(){
   overlay.style.display="none";
 }
 
-/* ================= RENDER ================= */
-
+/* RENDER */
 function render(){
   renderLista();
   renderTavoli();
 }
 
-/* ================= LISTA (ORIGINALE RIPRISTINATA) ================= */
-
+/* LISTA (NON MODIFICATA) */
 function renderLista(){
 
   lista.innerHTML="";
@@ -404,20 +400,14 @@ function renderLista(){
   });
 }
 
-/* ================= TAVOLI ================= */
-
+/* TAVOLI */
 function renderTavoli(){
 
   interna.innerHTML="";
   esterna.innerHTML="";
 
-  tavoliInterna.forEach(t=>{
-    interna.appendChild(creaTavolo(t));
-  });
-
-  tavoliEsterna.forEach(t=>{
-    esterna.appendChild(creaTavolo(t));
-  });
+  tavoliInterna.forEach(t=>interna.appendChild(creaTavolo(t)));
+  tavoliEsterna.forEach(t=>esterna.appendChild(creaTavolo(t)));
 }
 
 function statoTavolo(n){
@@ -431,25 +421,115 @@ function statoTavolo(n){
 }
 
 function creaTavolo(n){
-
   const d=document.createElement("div");
   d.className="tavolo "+statoTavolo(n);
   d.innerText=n;
-
   d.onclick=()=>assegna(n);
-
   return d;
 }
 
-/* ================= RESTO LOGICA INVARIATA ================= */
+/* LOGICA */
+async function assegna(n){
 
-async function assegna(n){ ... }
-async function conferma(e,row){ ... }
-async function arrivato(e,row){ ... }
-async function libera(e,row){ ... }
-async function updateStato(row,stato){ ... }
-async function elimina(e,row){ ... }
-async function aggiungi(){ ... }
+  if(!selezionata){
+    alert("Seleziona prenotazione");
+    return;
+  }
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaTavolo",
+      ristorante:ristorante.value,
+      row:selezionata.row,
+      tavolo:n
+    })
+  });
+
+  carica();
+}
+
+async function conferma(e,row){
+  e.stopPropagation();
+  await updateStato(row,"CONFERMATA");
+}
+
+async function arrivato(e,row){
+  e.stopPropagation();
+  await updateStato(row,"ARRIVATO");
+}
+
+async function libera(e,row){
+  e.stopPropagation();
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaTavolo",
+      ristorante:ristorante.value,
+      row,
+      tavolo:""
+    })
+  });
+
+  await updateStato(row,"CONFERMATA");
+}
+
+async function updateStato(row,stato){
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaStatoPrenotazione",
+      ristorante:ristorante.value,
+      row,
+      stato
+    })
+  });
+
+  carica();
+}
+
+async function elimina(e,row){
+
+  e.stopPropagation();
+
+  if(!confirm("Eliminare?")) return;
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"eliminaPrenotazione",
+      ristorante:ristorante.value,
+      row
+    })
+  });
+
+  carica();
+}
+
+async function aggiungi(){
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiungiPrenotazioneStaff",
+      ristorante:ristorante.value,
+      data:data.value,
+      ora:ora.value,
+      nome:nome.value,
+      telefono:telefono.value,
+      persone:Number(persone.value)
+    })
+  });
+
+  carica();
+}
 
 </script>
 
