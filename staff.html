@@ -78,21 +78,9 @@ body { font-family: Arial; max-width:1300px; margin:auto; padding:20px; backgrou
 .confermato { background:#f44336; }
 .arrivato { background:#2196f3; }
 
-/* 🔥 NUOVO: miglior UX campi */
-.field {
-  margin-top:10px;
-}
-
-.field label {
-  font-size:12px;
-  color:#666;
-}
-
-.field input {
-  width:100%;
-  padding:8px;
-  margin-top:3px;
-}
+.field { margin-top:10px; }
+.field label { font-size:12px; color:#666; }
+.field input { width:100%; padding:8px; margin-top:3px; }
 </style>
 </head>
 
@@ -168,4 +156,108 @@ body { font-family: Arial; max-width:1300px; margin:auto; padding:20px; backgrou
 
 </div>
 
-<!-- TUTTO IL RESTO IDENTICO -->
+<div class="container">
+
+<div class="col">
+  <h3>Prenotazioni</h3>
+  <div id="lista"></div>
+</div>
+
+<div class="col">
+  <h3>Sala Interna</h3>
+  <div id="interna" class="tavoli"></div>
+
+  <h3>Sala Esterna</h3>
+  <div id="esterna" class="tavoli"></div>
+</div>
+
+</div>
+
+<script>
+
+const API_URL = "/api/proxy";
+
+const PASSWORDS = {
+  roma: "roma123",
+  napoli: "napoli456",
+  vairano: "vairano789"
+};
+
+let prenotazioni = [];
+let selezionata = null;
+let snapshot = [];
+let auth = null;
+
+// LOGIN
+function login() {
+  const r = document.getElementById("loginRistorante").value;
+  const pw = document.getElementById("password").value;
+
+  if (PASSWORDS[r] === pw) {
+    auth = r;
+    sessionStorage.setItem("staff_auth", r);
+
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("ristorante").value = r;
+    document.getElementById("data").value = new Date().toISOString().split("T")[0];
+
+    start();
+  } else {
+    document.getElementById("loginError").innerText = "Password errata";
+  }
+}
+
+// INIT
+window.onload = () => {
+  const saved = sessionStorage.getItem("staff_auth");
+  if (saved) {
+    auth = saved;
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("ristorante").value = saved;
+    document.getElementById("data").value = new Date().toISOString().split("T")[0];
+    start();
+  }
+};
+
+function start() {
+  carica();
+  setInterval(refreshSilenzioso, 15000);
+}
+
+function checkRistorante() {
+  if (document.getElementById("ristorante").value !== auth) {
+    alert("Devi fare login per questo ristorante");
+    document.getElementById("ristorante").value = auth;
+  } else {
+    carica();
+  }
+}
+
+async function carica() {
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"getPrenotazioniGiorno",
+      ristorante:document.getElementById("ristorante").value,
+      data:document.getElementById("data").value
+    })
+  });
+
+  const json = await res.json();
+  prenotazioni = json.data || [];
+  render();
+}
+
+async function refreshSilenzioso() { carica(); }
+
+function render() {
+  document.getElementById("lista").innerHTML = JSON.stringify(prenotazioni);
+}
+
+function aggiungi() {}
+
+</script>
+
+</body>
+</html>
