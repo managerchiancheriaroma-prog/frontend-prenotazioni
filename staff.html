@@ -331,23 +331,38 @@ async function smartPolling(){
     const json = await res.json();
     const nuove = json.data || [];
 
-    // 🔍 controllo cambiamenti reali
+    // ⚡ confronto veloce (NO JSON.stringify)
+    const newRows = nuove.map(p => p.row);
+    const changed =
+      newRows.length !== snapshot.length ||
+      newRows.some(r => !snapshot.includes(r));
+
+    if (!changed) {
+      isFetching = false;
+      return;
+    }
+
+    // 🔔 nuova prenotazione
     const nuovi = nuove.filter(p => !snapshot.includes(p.row));
+    if (nuovi.length > 0) showToast("Nuova prenotazione");
 
-    if (nuovi.length > 0) {
-      showToast("Nuova prenotazione");
-    }
+    // ⚡ merge intelligente (NON overwrite)
+    nuove.forEach(nuovo => {
+      const esistente = prenotazioni.find(p => p.row === nuovo.row);
 
-    // 🔥 aggiorna SOLO se cambia qualcosa
-    const changed = nuove.length !== prenotazioni.length ||
-      JSON.stringify(snapshot) !== JSON.stringify(nuove.map(p=>p.row));
+      if (!esistente) {
+        prenotazioni.push(nuovo);
+      } else {
+        Object.assign(esistente, nuovo);
+      }
+    });
 
-    if (changed) {
-      prenotazioni = nuove;
-      snapshot = nuove.map(p=>p.row);
-      prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
-      render();
-    }
+    snapshot = newRows;
+
+    prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
+
+    // ⚡ render solo se necessario
+    render();
 
   } catch (e) {
     console.log("polling error", e);
