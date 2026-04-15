@@ -447,16 +447,34 @@ function renderLista(){
 
     el.onclick = () => selectRow(p.row);
 
-    el.innerHTML=`
-      <div class="row-top">
-        <b>${p.nome}</b>
-        <span>${p.ora}</span>
-      </div>
+   el.innerHTML=`
+  <div style="display:flex; justify-content:space-between; align-items:center;">
 
-      <div class="row-bottom">
-        <div>👥 ${p.persone}</div>
-        <div class="tavolo-right">🍽 ${p.tavolo || "-"}</div>
-      </div>
+    <div style="font-size:22px; font-weight:800; color:#333;">
+      ${p.ora}
+    </div>
+
+    <div style="
+      font-size:18px;
+      font-weight:800;
+      background:#333;
+      color:white;
+      padding:6px 12px;
+      border-radius:8px;
+    ">
+      🍽 ${p.tavolo || "-"}
+    </div>
+
+  </div>
+
+  <div style="margin-top:6px; font-size:16px; font-weight:600;">
+    ${p.nome}
+  </div>
+
+  <div style="margin-top:4px; font-size:14px; opacity:0.8;">
+    👥 ${p.persone} coperti
+  </div>
+`;
 
       <div class="actions">
         <button onclick="conferma(event,${p.row})">✔ Conferma</button>
