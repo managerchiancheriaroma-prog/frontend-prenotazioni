@@ -464,7 +464,82 @@ async function assegna(n){
 
   carica();
 }
+function updateLocal(row, patch) {
+  const p = prenotazioni.find(x => x.row === row);
+  if (!p) return;
 
+  Object.assign(p, patch);
+}
+  async function conferma(e,row){
+  e.stopPropagation();
+
+  updateLocal(row, { stato: "CONFERMATA" });
+  render();
+
+  fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaStatoPrenotazione",
+      ristorante:ristorante.value,
+      row,
+      stato:"CONFERMATA"
+    })
+  });
+}
+
+async function arrivato(e,row){
+  e.stopPropagation();
+
+  updateLocal(row, { stato: "ARRIVATO" });
+  render();
+
+  fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaStatoPrenotazione",
+      ristorante:ristorante.value,
+      row,
+      stato:"ARRIVATO"
+    })
+  });
+}
+
+async function libera(e,row){
+  e.stopPropagation();
+
+  updateLocal(row, { tavolo: "", stato: "PENDING" });
+  render();
+
+  fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiornaTavolo",
+      ristorante:ristorante.value,
+      row,
+      tavolo:""
+    })
+  });
+}
+
+async function elimina(e,row){
+  e.stopPropagation();
+
+  fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"eliminaPrenotazione",
+      ristorante:ristorante.value,
+      row
+    })
+  });
+
+  prenotazioni = prenotazioni.filter(p => p.row !== row);
+  render();
+}
 </script>
 
 </body>
