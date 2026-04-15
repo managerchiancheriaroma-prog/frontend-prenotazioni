@@ -318,10 +318,10 @@ function renderLista(){
       </div>
 
       <div class="actions">
-        <button onclick="conferma(event,${p.row})">✔</button>
-        <button onclick="arrivato(event,${p.row})">🍽</button>
-        <button onclick="libera(event,${p.row})">🧹</button>
-        <button onclick="elimina(event,${p.row})">🗑</button>
+        <button onclick="conferma(event,${p.row})">✔ Conferma</button>
+        <button onclick="arrivato(event,${p.row})">🍽 Arrivato</button>
+        <button onclick="libera(event,${p.row})">🧹 Libera</button>
+        <button onclick="elimina(event,${p.row})">🗑 Elimina</button>
       </div>
     `;
 
@@ -353,14 +353,14 @@ function creaTavolo(n){
   return d;
 }
 
-/* ================= OTTIMIZZAZIONE ================= */
-
+/* OTTIMIZZAZIONE */
 function aggiornaLocale(row, updateFn){
   const p = prenotazioni.find(x=>x.row===row);
   if(p){ updateFn(p); }
   render();
 }
 
+/* AZIONI */
 async function conferma(e,row){
   e.stopPropagation();
   aggiornaLocale(row,p=>p.stato="CONFERMATA");
@@ -424,6 +424,26 @@ async function assegna(n){
       tavolo:n
     })
   });
+}
+
+/* AGGIUNGI (RIPRISTINATA) */
+async function aggiungi(){
+
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiungiPrenotazioneStaff",
+      ristorante:ristorante.value,
+      data:data.value,
+      ora:ora.value,
+      nome:nome.value,
+      telefono:telefono.value,
+      persone:Number(persone.value)
+    })
+  });
+
+  carica();
 }
 
 </script>
