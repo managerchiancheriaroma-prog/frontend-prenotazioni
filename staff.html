@@ -444,28 +444,33 @@ function creaTavolo(n){
   d.onclick=()=>assegna(n);
   return d;
 }
-
 async function assegna(n){
   if(!selezionata){
     alert("Seleziona prenotazione");
     return;
   }
 
-  // ⚡ aggiornamento immediato UI
-  updateLocal(selezionata.row, { tavolo: n });
-  render();
+  const row = selezionata.row;
 
-  // ⚡ invio server in background (senza bloccare UI)
+  // 1) UPDATE IMMEDIATO UI (zero attesa)
+  const p = prenotazioni.find(x => x.row === row);
+  if (p) {
+    p.tavolo = n;
+  }
+
+  render(); // ← cambio colore immediato
+
+  // 2) chiamata server in background (senza bloccare UI)
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
       action:"aggiornaTavolo",
       ristorante:ristorante.value,
-      row:selezionata.row,
+      row,
       tavolo:n
     })
-  });
+  }).catch(err => console.log(err));
 }
 function updateLocal(row, patch) {
   const p = prenotazioni.find(x => x.row === row);
