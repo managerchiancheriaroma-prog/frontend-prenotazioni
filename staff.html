@@ -451,7 +451,12 @@ async function assegna(n){
     return;
   }
 
-  await fetch(API_URL,{
+  // ⚡ aggiornamento immediato UI
+  updateLocal(selezionata.row, { tavolo: n });
+  render();
+
+  // ⚡ invio server in background (senza bloccare UI)
+  fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
@@ -461,8 +466,6 @@ async function assegna(n){
       tavolo:n
     })
   });
-
-  carica();
 }
 function updateLocal(row, patch) {
   const p = prenotazioni.find(x => x.row === row);
