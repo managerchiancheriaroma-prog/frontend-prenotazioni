@@ -259,14 +259,45 @@ button {
 
 const API_URL = "/api/proxy";
 
+const PASSWORDS = {
+  roma: "roma123",
+  napoli: "napoli456",
+  vairano: "vairano789"
+};
+
 let prenotazioni = [];
 let selezionata = null;
 let snapshot = [];
+let auth = null;
 
-/* AVVIO */
+/* LOGIN */
+function login() {
+  const r = loginRistorante.value;
+  const pw = password.value;
+
+  if (PASSWORDS[r] === pw) {
+    auth = r;
+    sessionStorage.setItem("staff_auth", r);
+    loginScreen.style.display = "none";
+
+    ristorante.value = r;
+    data.value = new Date().toISOString().split("T")[0];
+
+    start();
+  } else {
+    loginError.innerText = "Password errata";
+  }
+}
+
 window.onload = () => {
-  data.value = new Date().toISOString().split("T")[0];
-  start();
+  const saved = sessionStorage.getItem("staff_auth");
+  if (saved) {
+    auth = saved;
+    loginScreen.style.display = "none";
+    ristorante.value = saved;
+    data.value = new Date().toISOString().split("T")[0];
+    start();
+  }
 };
 
 function start(){
@@ -274,7 +305,8 @@ function start(){
   setInterval(refreshSilenzioso, 10000);
 }
 
-/* CARICA */
+/* resto IDENTICO (non toccato) */
+
 async function carica() {
   const res = await fetch(API_URL,{
     method:"POST",
@@ -294,7 +326,6 @@ async function carica() {
   render();
 }
 
-/* REFRESH INTELLIGENTE */
 async function refreshSilenzioso() {
 
   const res = await fetch(API_URL,{
@@ -324,7 +355,6 @@ async function refreshSilenzioso() {
   render();
 }
 
-/* TOAST */
 function showToast(msg){
   toast.innerText = msg;
   toast.style.display="block";
@@ -336,13 +366,11 @@ function closeToast(){
   overlay.style.display="none";
 }
 
-/* RENDER */
 function render(){
   renderLista();
   renderTavoli();
 }
 
-/* LISTA */
 function renderLista(){
   lista.innerHTML="";
 
@@ -379,7 +407,6 @@ function renderLista(){
   });
 }
 
-/* resto invariato */
 function selectRow(row){
   selezionata = prenotazioni.find(p => p.row === row) || null;
   render();
