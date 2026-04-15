@@ -447,7 +447,7 @@ function renderLista(){
 
     el.onclick = () => selectRow(p.row);
 
-   el.innerHTML=`
+el.innerHTML = `
   <div style="display:flex; justify-content:space-between; align-items:center;">
 
     <div style="font-size:22px; font-weight:800; color:#333;">
@@ -474,15 +474,14 @@ function renderLista(){
   <div style="margin-top:4px; font-size:14px; opacity:0.8;">
     👥 ${p.persone} coperti
   </div>
-`;
 
-      <div class="actions">
-        <button onclick="conferma(event,${p.row})">✔ Conferma</button>
-        <button onclick="arrivato(event,${p.row})">🍽 Arrivato</button>
-        <button onclick="libera(event,${p.row})">🧹 Libera</button>
-        <button onclick="elimina(event,${p.row})">🗑 Elimina</button>
-      </div>
-    `;
+  <div class="actions">
+    <button onclick="conferma(event,${p.row})">✔ Conferma</button>
+    <button onclick="arrivato(event,${p.row})">🍽 Arrivato</button>
+    <button onclick="libera(event,${p.row})">🧹 Libera</button>
+    <button onclick="elimina(event,${p.row})">🗑 Elimina</button>
+  </div>
+`;
 
     lista.appendChild(el);
   });
