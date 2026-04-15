@@ -140,7 +140,7 @@ button {
   color:white;
 }
 
-/* ===================== FIX UI TAVOLO ===================== */
+/* UI tavolo */
 .row-top {
   display:flex;
   justify-content:space-between;
@@ -151,8 +151,6 @@ button {
   display:flex;
   justify-content:space-between;
   margin-top:6px;
-  font-size:13px;
-  opacity:0.9;
 }
 
 .tavolo-right {
@@ -191,19 +189,13 @@ button {
 <div class="header">
 
 <div class="left">
-<select id="ristorante" onchange="checkRistorante()">
+<select id="ristorante">
 <option value="roma">Roma</option>
 <option value="napoli">Napoli</option>
 <option value="vairano">Vairano</option>
 </select>
 
 <input type="date" id="data" onchange="carica()">
-
-<select id="servizio" onchange="render()">
-<option value="tutti">Tutti</option>
-<option value="pranzo">Pranzo</option>
-<option value="cena">Cena</option>
-</select>
 </div>
 
 <div class="right">
@@ -259,58 +251,21 @@ button {
 
 const API_URL = "/api/proxy";
 
-const PASSWORDS = {
-  roma: "roma123",
-  napoli: "napoli456",
-  vairano: "vairano789"
-};
-
 let prenotazioni = [];
 let selezionata = null;
-let snapshot = [];
-let auth = null;
 
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
 
 /* LOGIN */
 function login() {
-  const r = loginRistorante.value;
-  const pw = password.value;
-
-  if (PASSWORDS[r] === pw) {
-    auth = r;
-    sessionStorage.setItem("staff_auth", r);
-    loginScreen.style.display = "none";
-
-    ristorante.value = r;
-    data.value = new Date().toISOString().split("T")[0];
-
-    start();
-  } else {
-    loginError.innerText = "Password errata";
-  }
-}
-
-window.onload = () => {
-  const saved = sessionStorage.getItem("staff_auth");
-  if (saved) {
-    auth = saved;
-    loginScreen.style.display = "none";
-    ristorante.value = saved;
-    data.value = new Date().toISOString().split("T")[0];
-    start();
-  }
-};
-
-function start() {
+  loginScreen.style.display = "none";
+  data.value = new Date().toISOString().split("T")[0];
   carica();
-  setInterval(refreshSilenzioso, 15000);
 }
 
 /* CARICA */
 async function carica() {
-
   const res = await fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -323,52 +278,7 @@ async function carica() {
 
   const json = await res.json();
   prenotazioni = json.data || [];
-
-  snapshot = prenotazioni.map(p => p.row);
-
-  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
-
   render();
-}
-
-/* REFRESH (OTTIMIZZATO LEGGERO) */
-async function refreshSilenzioso() {
-
-  const res = await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"getPrenotazioniGiorno",
-      ristorante:ristorante.value,
-      data:data.value
-    })
-  });
-
-  const json = await res.json();
-  const nuove = json.data || [];
-
-  const nuovi = nuove.filter(p => !snapshot.includes(p.row));
-
-  if (nuovi.length) showToast("Nuova prenotazione");
-
-  prenotazioni = nuove;
-  snapshot = nuove.map(p=>p.row);
-
-  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
-
-  render();
-}
-
-/* TOAST */
-function showToast(msg){
-  toast.innerText = msg;
-  toast.style.display="block";
-  overlay.style.display="block";
-}
-
-function closeToast(){
-  toast.style.display="none";
-  overlay.style.display="none";
 }
 
 /* RENDER */
@@ -377,7 +287,7 @@ function render(){
   renderTavoli();
 }
 
-/* LISTA (SOLO UI MODIFICATA TAVOLO A DESTRA) */
+/* LISTA */
 function renderLista(){
 
   lista.innerHTML="";
@@ -391,12 +301,10 @@ function renderLista(){
       el.classList.add("selected");
     }
 
-    el.onclick = () => selectRow(p.row);
-
-    const statoColor =
-      p.stato==="PENDING" ? "#ff9800" :
-      p.stato==="ARRIVATO" ? "#2196f3" :
-      "#f44336";
+    el.onclick = () => {
+      selezionata = p;
+      render();
+    };
 
     el.innerHTML=`
       <div class="row-top">
@@ -410,21 +318,15 @@ function renderLista(){
       </div>
 
       <div class="actions">
-        <button onclick="conferma(event,${p.row})">✔ Conferma</button>
-        <button onclick="arrivato(event,${p.row})">🍽 Arrivato</button>
-        <button onclick="libera(event,${p.row})">🧹 Libera</button>
-        <button onclick="elimina(event,${p.row})">🗑 Elimina</button>
+        <button onclick="conferma(event,${p.row})">✔</button>
+        <button onclick="arrivato(event,${p.row})">🍽</button>
+        <button onclick="libera(event,${p.row})">🧹</button>
+        <button onclick="elimina(event,${p.row})">🗑</button>
       </div>
     `;
 
     lista.appendChild(el);
   });
-}
-
-/* SELEZIONE */
-function selectRow(row){
-  selezionata = prenotazioni.find(p => p.row === row) || null;
-  render();
 }
 
 /* TAVOLI */
@@ -451,10 +353,68 @@ function creaTavolo(n){
   return d;
 }
 
+/* ================= OTTIMIZZAZIONE ================= */
+
+function aggiornaLocale(row, updateFn){
+  const p = prenotazioni.find(x=>x.row===row);
+  if(p){ updateFn(p); }
+  render();
+}
+
+async function conferma(e,row){
+  e.stopPropagation();
+  aggiornaLocale(row,p=>p.stato="CONFERMATA");
+
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    action:"aggiornaStatoPrenotazione",
+    ristorante:ristorante.value,
+    row,
+    stato:"CONFERMATA"
+  })});
+}
+
+async function arrivato(e,row){
+  e.stopPropagation();
+  aggiornaLocale(row,p=>p.stato="ARRIVATO");
+
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    action:"aggiornaStatoPrenotazione",
+    ristorante:ristorante.value,
+    row,
+    stato:"ARRIVATO"
+  })});
+}
+
+async function libera(e,row){
+  e.stopPropagation();
+  aggiornaLocale(row,p=>p.tavolo="");
+
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    action:"aggiornaTavolo",
+    ristorante:ristorante.value,
+    row,
+    tavolo:""
+  })});
+}
+
+async function elimina(e,row){
+  e.stopPropagation();
+  prenotazioni = prenotazioni.filter(p=>p.row!==row);
+  render();
+
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    action:"eliminaPrenotazione",
+    ristorante:ristorante.value,
+    row
+  })});
+}
+
 async function assegna(n){
   if(!selezionata){ alert("Seleziona prenotazione"); return; }
 
-  await fetch(API_URL,{
+  aggiornaLocale(selezionata.row,p=>p.tavolo=n);
+
+  fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
@@ -464,52 +424,6 @@ async function assegna(n){
       tavolo:n
     })
   });
-
-  carica();
-}
-
-/* FUNZIONI ORIGINALI */
-async function conferma(e,row){
-  e.stopPropagation();
-  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-    action:"aggiornaStatoPrenotazione",
-    ristorante:ristorante.value,
-    row,
-    stato:"CONFERMATA"
-  })});
-  carica();
-}
-
-async function arrivato(e,row){
-  e.stopPropagation();
-  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-    action:"aggiornaStatoPrenotazione",
-    ristorante:ristorante.value,
-    row,
-    stato:"ARRIVATO"
-  })});
-  carica();
-}
-
-async function libera(e,row){
-  e.stopPropagation();
-  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-    action:"aggiornaTavolo",
-    ristorante:ristorante.value,
-    row,
-    tavolo:""
-  })});
-  carica();
-}
-
-async function elimina(e,row){
-  e.stopPropagation();
-  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-    action:"eliminaPrenotazione",
-    ristorante:ristorante.value,
-    row
-  })});
-  carica();
 }
 
 </script>
