@@ -303,11 +303,58 @@ window.onload = () => {
   }
 };
 
+let pollingTimer = null;
+let isFetching = false;
+
 function start(){
   carica();
-  setInterval(refreshSilenzioso, 30000);
-}
 
+  // smart polling ogni 4 secondi
+  pollingTimer = setInterval(smartPolling, 4000);
+}
+async function smartPolling(){
+
+  if (isFetching) return;
+  isFetching = true;
+
+  try {
+    const res = await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action:"getPrenotazioniGiorno",
+        ristorante:ristorante.value,
+        data:data.value
+      })
+    });
+
+    const json = await res.json();
+    const nuove = json.data || [];
+
+    // 🔍 controllo cambiamenti reali
+    const nuovi = nuove.filter(p => !snapshot.includes(p.row));
+
+    if (nuovi.length > 0) {
+      showToast("Nuova prenotazione");
+    }
+
+    // 🔥 aggiorna SOLO se cambia qualcosa
+    const changed = nuove.length !== prenotazioni.length ||
+      JSON.stringify(snapshot) !== JSON.stringify(nuove.map(p=>p.row));
+
+    if (changed) {
+      prenotazioni = nuove;
+      snapshot = nuove.map(p=>p.row);
+      prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
+      render();
+    }
+
+  } catch (e) {
+    console.log("polling error", e);
+  }
+
+  isFetching = false;
+}
 /* CARICA */
 async function carica() {
   const res = await fetch(API_URL,{
