@@ -381,6 +381,13 @@ async function carica() {
       data:data.value
     })
   });
+   const json = await res.json();
+  prenotazioni = json.data || [];
+  snapshot = prenotazioni.map(p => p.row);
+  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
+
+  render();
+}
 async function aggiungi(){
   const oraVal = ora.value;
   const nomeVal = nome.value;
@@ -391,15 +398,8 @@ async function aggiungi(){
     alert("Compila i campi obbligatori");
     return;
   }
-  
-  const json = await res.json();
-  prenotazioni = json.data || [];
-  snapshot = prenotazioni.map(p => p.row);
-  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
 
-  render();
-}
- const nuova = {
+  const nuova = {
     ora: oraVal,
     nome: nomeVal,
     telefono: telefonoVal,
@@ -408,18 +408,18 @@ async function aggiungi(){
     stato: "PENDING"
   };
 
-  // ⚡ UI immediata
+  // UI immediata
   prenotazioni.push(nuova);
   prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
   render();
 
-  // reset campi
+  // reset
   ora.value = "";
   nome.value = "";
   telefono.value = "";
   persone.value = "";
 
-  // chiamata server
+  // server
   fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -431,7 +431,7 @@ async function aggiungi(){
     })
   }).catch(err => console.log(err));
 }
- 
+  
 /* REFRESH */
 async function refreshSilenzioso() {
   const res = await fetch(API_URL,{
