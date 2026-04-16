@@ -293,6 +293,7 @@ let prenotazioni = [];
 let selezionata = null;
 let snapshot = [];
 let auth = null;
+let lastCreatedRow = null;
 
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
@@ -371,11 +372,12 @@ async function smartPolling(){
     // 🔔 nuova prenotazione
 const nuovi = nuove.filter(p => !snapshot.includes(p.row));
 
-// 🔥 escludi modifiche locali recenti
+// 🔥 escludi solo la prenotazione appena creata da noi
 const nuoviReali = nuovi.filter(p => p.row !== lastCreatedRow);
 
-const nuovi = nuove.filter(p => !snapshot.includes(p.row));
-
+if (nuoviReali.length > 0) {
+  showToast("Nuova prenotazione");
+}
 if (nuovi.length > 0) {
   showToast("Nuova prenotazione");
 }
@@ -460,7 +462,7 @@ async function carica() {
     alert("Errore salvataggio prenotazione");
     return;
   }
-
+lastCreatedRow = null;
 await carica(); // ricarica tutto dal server
 
   ora.value = "";
