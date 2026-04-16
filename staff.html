@@ -467,22 +467,42 @@ el.innerHTML = `
 
   </div>
 
-  <div style="margin-top:6px; font-size:16px; font-weight:600;">
+  <!-- NOME PIÙ VISIBILE -->
+  <div style="
+    margin-top:8px;
+    font-size:18px;
+    font-weight:800;
+    color:#111;
+  ">
     ${p.nome}
   </div>
 
-  <div style="margin-top:4px; font-size:14px; opacity:0.8;">
+  <!-- COPERTI PIÙ GRANDI E CENTRATI -->
+  <div style="
+    margin-top:4px;
+    font-size:16px;
+    font-weight:700;
+    text-align:center;
+    color:#444;
+  ">
     👥 ${p.persone} coperti
   </div>
 
-  <div class="actions">
-    <button onclick="conferma(event,${p.row})">✔ Conferma</button>
-    <button onclick="arrivato(event,${p.row})">🍽 Arrivato</button>
-    <button onclick="libera(event,${p.row})">🧹 Libera</button>
-    <button onclick="elimina(event,${p.row})">🗑 Elimina</button>
+  <!-- BOTTONI IN FILA ORIZZONTALE -->
+  <div style="
+    display:flex;
+    gap:6px;
+    margin-top:10px;
+    justify-content:space-between;
+  ">
+
+    <button style="flex:1; padding:8px; font-size:12px;" onclick="conferma(event,${p.row})">✔</button>
+    <button style="flex:1; padding:8px; font-size:12px;" onclick="arrivato(event,${p.row})">🍽</button>
+    <button style="flex:1; padding:8px; font-size:12px;" onclick="libera(event,${p.row})">🧹</button>
+    <button style="flex:1; padding:8px; font-size:12px;" onclick="elimina(event,${p.row})">🗑</button>
+
   </div>
 `;
-
     lista.appendChild(el);
   });
 }
