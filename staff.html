@@ -728,7 +728,7 @@ async function libera(e,row){
 async function elimina(e,row){
   e.stopPropagation();
 
-  fetch(API_URL,{
+  const res = await fetch(API_URL,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
@@ -738,7 +738,13 @@ async function elimina(e,row){
     })
   });
 
+  const json = await res.json();
+  console.log("ELIMINA RISPOSTA:", json);
+
+  // aggiorna UI subito
   prenotazioni = prenotazioni.filter(p => p.row !== row);
+  snapshot = snapshot.filter(r => r !== row); // 👈 IMPORTANTISSIMO
+
   render();
 }
 </script>
