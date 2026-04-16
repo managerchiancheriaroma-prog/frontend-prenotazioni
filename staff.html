@@ -416,9 +416,25 @@ async function aggiungi(){
   };
 
   // UI immediata
-  prenotazioni.push(nuova);
+const res = await fetch(API_URL,{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body: JSON.stringify({
+    action:"aggiungiPrenotazione",
+    ristorante:ristorante.value,
+    data:data.value,
+    ...nuova
+  })
+});
+
+const json = await res.json();
+
+// 👇 il server deve restituire la prenotazione con row
+if (json.data) {
+  prenotazioni.push(json.data);
   prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
   render();
+}
 
   // reset
   ora.value = "";
