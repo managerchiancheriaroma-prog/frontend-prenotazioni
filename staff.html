@@ -395,7 +395,7 @@ async function carica() {
 
   render();
 }
-async function aggiungi(){
+  async function aggiungi(){
   const oraVal = ora.value;
   const nomeVal = nome.value;
   const telefonoVal = telefono.value;
@@ -410,37 +410,37 @@ async function aggiungi(){
     ora: oraVal,
     nome: nomeVal,
     telefono: telefonoVal,
-    persone: personeVal,
-    tavolo: "",
-    stato: "PENDING"
+    persone: personeVal
   };
 
-  // UI immediata
-const res = await fetch(API_URL,{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body: JSON.stringify({
-    action:"aggiungiPrenotazione",
-    ristorante:ristorante.value,
-    data:data.value,
-    ...nuova
-  })
-});
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiungiPrenotazione",
+      ristorante: ristorante.value,
+      data: data.value,
+      ...nuova
+    })
+  });
 
-const json = await res.json();
+  const json = await res.json();
+  console.log("RISPOSTA SERVER:", json);
 
-// 👇 il server deve restituire la prenotazione con row
-if (json.data) {
+  if (!json.data || !json.data.row) {
+    alert("Errore salvataggio prenotazione");
+    return;
+  }
+
   prenotazioni.push(json.data);
   prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
   render();
-}
 
-  // reset
   ora.value = "";
   nome.value = "";
   telefono.value = "";
   persone.value = "";
+}
 
   // server
   fetch(API_URL,{
