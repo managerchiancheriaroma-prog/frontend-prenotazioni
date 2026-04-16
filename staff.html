@@ -417,7 +417,7 @@ async function carica() {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
-      action:"aggiungiPrenotazione",
+      action:"aggiungiPrenotazioneStaff",
       ristorante: ristorante.value,
       data: data.value,
       ...nuova
@@ -427,7 +427,7 @@ async function carica() {
   const json = await res.json();
   console.log("RISPOSTA SERVER:", json);
 
-  if (!json.data || !json.data.row) {
+  if (!json.success) {
     alert("Errore salvataggio prenotazione");
     return;
   }
