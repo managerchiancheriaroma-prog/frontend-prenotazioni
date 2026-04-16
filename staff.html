@@ -352,8 +352,14 @@ async function smartPolling(){
     }
 
     // 🔔 nuova prenotazione
-    const nuovi = nuove.filter(p => !snapshot.includes(p && p.row));
-    if (nuovi.length > 0) showToast("Nuova prenotazione");
+const nuovi = nuove.filter(p => !snapshot.includes(p.row));
+
+// 🔥 escludi modifiche locali recenti
+const nuoviReali = nuovi.filter(p => p.row !== lastCreatedRow);
+
+if (nuoviReali.length > 0) {
+  showToast("Nuova prenotazione");
+}
 
     // ⚡ merge intelligente (NON overwrite)
     nuove.forEach(nuovo => {
