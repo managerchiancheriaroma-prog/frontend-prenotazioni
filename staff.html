@@ -339,7 +339,9 @@ async function smartPolling(){
     const nuove = json.data || [];
 
     // ⚡ confronto veloce (NO JSON.stringify)
-    const newRows = nuove.map(p => p.row);
+    const newRows = nuove
+  .filter(p => p && p.row)
+  .map(p => p.row);
     const changed =
       newRows.length !== snapshot.length ||
       newRows.some(r => !snapshot.includes(r));
@@ -350,12 +352,12 @@ async function smartPolling(){
     }
 
     // 🔔 nuova prenotazione
-    const nuovi = nuove.filter(p => !snapshot.includes(p.row));
+    const nuovi = nuove.filter(p => !snapshot.includes(p && p.row));
     if (nuovi.length > 0) showToast("Nuova prenotazione");
 
     // ⚡ merge intelligente (NON overwrite)
     nuove.forEach(nuovo => {
-      const esistente = prenotazioni.find(p => p.row === nuovo.row);
+      const esistente = prenotazioni.find(p => p && p.row === nuovo.row);
 
       if (!esistente) {
         prenotazioni.push(nuovo);
@@ -432,9 +434,7 @@ async function carica() {
     return;
   }
 
-  prenotazioni.push(json.data);
-  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
-  render();
+await carica(); // ricarica tutto dal server
 
   ora.value = "";
   nome.value = "";
