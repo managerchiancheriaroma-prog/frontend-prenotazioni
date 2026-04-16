@@ -454,17 +454,16 @@ el.innerHTML = `
       ${p.ora}
     </div>
 
-    <div style="
-      font-size:18px;
-      font-weight:800;
-      background:#333;
-      color:white;
-      padding:6px 12px;
-      border-radius:8px;
-    ">
-      🍽 ${p.tavolo || "-"}
-    </div>
-
+<div style="
+  font-size:16px;
+  font-weight:700;
+  background:${p.tavolo ? "#e3f2fd" : "#eee"};
+color:${p.tavolo ? "#1976d2" : "#666"};
+  padding:6px 12px;
+  border-radius:20px;
+">
+  T${p.tavolo || "-"}
+</div>
   </div>
 
   <!-- NOME PIÙ VISIBILE -->
