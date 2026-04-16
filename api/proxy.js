@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
 
-  const GAS_URL = "https://script.google.com/macros/s/AKfycby_8dzeOqTJRjuMyIij7qwcItkYREq2awJ1002Hqcj-b5wlaoupnyjseyZHwKwqEW2T/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbw4d0cVoz61TCXAoJGiA6qR3oge07Nf9ICXke-wfGrOKwjyJfzVnOReaQMH_hDGM0KV/exec";
 
   try {
 
