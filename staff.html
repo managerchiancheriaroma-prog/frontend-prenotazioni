@@ -381,7 +381,50 @@ async function carica() {
       data:data.value
     })
   });
+async function aggiungi(){
+  const oraVal = ora.value;
+  const nomeVal = nome.value;
+  const telefonoVal = telefono.value;
+  const personeVal = persone.value;
 
+  if (!oraVal || !nomeVal || !personeVal) {
+    alert("Compila i campi obbligatori");
+    return;
+  }
+
+  const nuova = {
+    ora: oraVal,
+    nome: nomeVal,
+    telefono: telefonoVal,
+    persone: personeVal,
+    tavolo: "",
+    stato: "PENDING"
+  };
+
+  // ⚡ UI immediata
+  prenotazioni.push(nuova);
+  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
+  render();
+
+  // reset campi
+  ora.value = "";
+  nome.value = "";
+  telefono.value = "";
+  persone.value = "";
+
+  // chiamata server
+  fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiungiPrenotazione",
+      ristorante:ristorante.value,
+      data:data.value,
+      ...nuova
+    })
+  }).catch(err => console.log(err));
+}
+  
   const json = await res.json();
   prenotazioni = json.data || [];
   snapshot = prenotazioni.map(p => p.row);
