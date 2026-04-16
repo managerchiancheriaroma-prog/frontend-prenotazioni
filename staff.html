@@ -374,20 +374,24 @@ const nuovi = nuove.filter(p => !snapshot.includes(p.row));
 // 🔥 escludi modifiche locali recenti
 const nuoviReali = nuovi.filter(p => p.row !== lastCreatedRow);
 
-if (nuoviReali.length > 0) {
+const nuovi = nuove.filter(p => !snapshot.includes(p.row));
+
+if (nuovi.length > 0) {
   showToast("Nuova prenotazione");
 }
 
     // ⚡ merge intelligente (NON overwrite)
-    nuove.forEach(nuovo => {
-      const esistente = prenotazioni.find(p => p && p.row === nuovo.row);
+const mappa = new Map();
 
-      if (!esistente) {
-        prenotazioni.push(nuovo);
-      } else {
-        Object.assign(esistente, nuovo);
-      }
-    });
+prenotazioni.forEach(p => {
+  if (p && p.row) mappa.set(p.row, p);
+});
+
+nuove.forEach(n => {
+  if (n && n.row) mappa.set(n.row, { ...mappa.get(n.row), ...n });
+});
+
+prenotazioni = Array.from(mappa.values());
 
     snapshot = newRows;
 
