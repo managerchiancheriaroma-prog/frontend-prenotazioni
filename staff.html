@@ -60,15 +60,22 @@ h2 { text-align:center; }
 /* CARD */
 .card {
   background:white;
-  padding:12px;
-  margin-top:10px;
-  border-radius:12px;
+  padding:14px;
+  margin-top:12px;
+  border-radius:16px;
   font-size:14px;
   cursor:pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: 0.2s;
+}
+
+.card:active {
+  transform: scale(0.98);
 }
 
 .selected {
-  border:3px solid #00bcd4;
+  border:3px solid #2196f3;
+  box-shadow: 0 0 10px rgba(33,150,243,0.3);
 }
 
 /* ACTIONS */
