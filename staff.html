@@ -167,7 +167,24 @@ button {
   min-width:70px;
   text-align:right;
 }
+.card {
+  background:white;
+}
 
+/* ARRIVATO → azzurro soft */
+.card.arrivato {
+  background: rgba(33, 150, 243, 0.15);
+}
+
+/* CONFERMATA → bianco (default) */
+.card.confermato {
+  background: white;
+}
+
+/* LIBERA → grigio */
+.card.libera {
+  background: rgba(0,0,0,0.08);
+}
 </style>
 </head>
 
@@ -499,7 +516,19 @@ function renderLista(){
 
   prenotazioni.forEach(p=>{
     const el=document.createElement("div");
-    el.className="card";
+    el.className = "card";
+
+const stato = (p.stato || "").toUpperCase();
+
+if (stato === "ARRIVATO") {
+  el.classList.add("arrivato");
+}
+else if (stato === "CONFERMATA") {
+  el.classList.add("confermato");
+}
+else if (stato === "PENDING") {
+  el.classList.add("libera");
+}
 
     if (selezionata && selezionata.row === p.row) {
       el.classList.add("selected");
