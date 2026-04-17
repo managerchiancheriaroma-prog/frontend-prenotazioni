@@ -400,8 +400,14 @@ nuove.forEach(n => {
 
 prenotazioni = Array.from(mappa.values());
 
-    snapshot = newRows;
+   const newSnapshot = nuove.map(p =>
+  `${p.row}-${p.stato}-${p.tavolo}`
+);
+const changed =
+  newSnapshot.length !== snapshot.length ||
+  newSnapshot.some(x => !snapshot.includes(x));
 
+snapshot = newSnapshot;
     prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
 
     // ⚡ render solo se necessario
@@ -657,10 +663,11 @@ async function assegna(n){
   const row = selezionata.row;
 
   // 1) UPDATE IMMEDIATO UI (zero attesa)
-  const p = prenotazioni.find(x => x.row === row);
-  if (p) {
-    p.tavolo = n;
-  }
+ const p = prenotazioni.find(x => x.row === row);
+if (p) {
+  p.tavolo = n;
+}
+selezionata = p;
 
   render(); // ← cambio colore immediato
 
