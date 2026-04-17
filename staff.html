@@ -185,6 +185,9 @@ button {
 .card.libera {
   background: rgba(0,0,0,0.08);
 }
+  .card.pending-row {
+  background: rgba(0,0,0,0.08);
+}
 </style>
 </head>
 
@@ -293,7 +296,6 @@ let prenotazioni = [];
 let selezionata = null;
 let snapshot = [];
 let auth = null;
-let lastCreatedRow = null;
 
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
@@ -373,14 +375,11 @@ async function smartPolling(){
 const nuovi = nuove.filter(p => !snapshot.includes(p.row));
 
 // 🔥 escludi solo la prenotazione appena creata da noi
-const nuoviReali = nuovi.filter(p => p.row !== lastCreatedRow);
 
 if (nuoviReali.length > 0) {
   showToast("Nuova prenotazione");
 }
-if (nuovi.length > 0) {
-  showToast("Nuova prenotazione");
-}
+
 
     // ⚡ merge intelligente (NON overwrite)
 const mappa = new Map();
@@ -533,7 +532,7 @@ else if (stato === "CONFERMATA") {
   el.classList.add("confermato");
 }
 else if (stato === "PENDING") {
-  el.classList.add("libera");
+  el.classList.add("pending-row");
 }
 
     if (selezionata && selezionata.row === p.row) {
