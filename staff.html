@@ -182,9 +182,7 @@ button {
 }
 
 /* LIBERA → grigio */
-.card.libera {
-  background: rgba(0,0,0,0.08);
-}
+
   .card.pending-row {
   background: rgba(0,0,0,0.08);
 }
@@ -459,7 +457,7 @@ async function carica() {
     alert("Errore salvataggio prenotazione");
     return;
   }
-lastCreatedRow = null;
+
 await carica(); // ricarica tutto dal server
 
   ora.value = "";
