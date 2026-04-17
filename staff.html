@@ -374,9 +374,7 @@ async function smartPolling(){
     // 🔔 nuova prenotazione
 const nuovi = nuove.filter(p => !snapshot.includes(p.row));
 
-// 🔥 escludi solo la prenotazione appena creata da noi
-
-if (nuoviReali.length > 0) {
+if (nuovi.length > 0) {
   showToast("Nuova prenotazione");
 }
 
