@@ -634,11 +634,13 @@ function statoTavolo(n){
   const t = prenotazioni.find(p => p.tavolo == n);
 
   if (!t) return "libero";
+
   if (t.stato === "PENDING") return "pending";
   if (t.stato === "ARRIVATO") return "arrivato";
+  if (t.stato === "LIBERA") return "libero"; // 🔥 FIX CHIAVE
+
   return "confermato";
 }
-
 function creaTavolo(n){
   const d=document.createElement("div");
   d.className="tavolo "+statoTavolo(n);
