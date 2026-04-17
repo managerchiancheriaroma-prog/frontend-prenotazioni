@@ -121,13 +121,15 @@ h2 { text-align:center; }
   position:fixed;
   top:50%; left:50%;
   transform:translate(-50%,-50%);
-  background:#333;
+  background:#ff9800;
   color:white;
-  padding:25px;
-  border-radius:12px;
+  padding:30px;
+  border-radius:16px;
   display:none;
   text-align:center;
-  font-size:18px;
+  font-size:20px;
+  font-weight:bold;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
 }
 
 /* INPUT */
@@ -183,8 +185,9 @@ button {
 
 /* LIBERA → grigio */
 
-  .card.pending-row {
-  background: rgba(0,0,0,0.08);
+ .card.pending-row {
+  background: #ff9800;
+  color: white;
 }
 </style>
 </head>
@@ -373,7 +376,8 @@ async function smartPolling(){
 const nuovi = nuove.filter(p => !snapshot.includes(p.row));
 
 if (nuovi.length > 0) {
-  showToast("Nuova prenotazione");
+  const p = nuovi[0]; // prima nuova prenotazione
+  showToast(`Nuova prenotazione\n${p.nome} (${p.persone} persone)`);
 }
 
 
