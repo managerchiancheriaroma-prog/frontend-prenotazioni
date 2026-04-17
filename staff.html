@@ -175,8 +175,8 @@ button {
 
 /* ARRIVATO → azzurro soft */
 .card.arrivato {
-  background: #2196f3;
-  color: white;
+  background: rgba(33, 150, 243, 0.25);
+  color: #0d47a1;
 }
 
 /* CONFERMATA → bianco (default) */
@@ -185,7 +185,10 @@ button {
 }
 
 /* LIBERA → grigio */
-
+.card.faded {
+  opacity: 0.4;
+  filter: grayscale(40%);
+}
  .card.pending-row {
   background: #ff9800;
   color: white;
@@ -538,6 +541,9 @@ else if (stato === "CONFERMATA") {
 else if (stato === "PENDING") {
   el.classList.add("pending-row");
 }
+    else if (stato === "LIBERA") {
+  el.classList.add("faded");
+}
 
     if (selezionata && selezionata.row === p.row) {
       el.classList.add("selected");
@@ -713,7 +719,7 @@ async function arrivato(e,row){
 async function libera(e,row){
   e.stopPropagation();
 
-  updateLocal(row, { tavolo: "", stato: "PENDING" });
+  updateLocal(row, { tavolo: "", stato: "LIBERA" });
   render();
 
   fetch(API_URL,{
@@ -726,7 +732,18 @@ async function libera(e,row){
       tavolo:""
     })
   });
+  fetch(API_URL,{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body: JSON.stringify({
+    action:"aggiornaStatoPrenotazione",
+    ristorante:ristorante.value,
+    row,
+    stato:"LIBERA"
+  })
+});
 }
+  
 
 async function elimina(e,row){
   e.stopPropagation();
