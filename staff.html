@@ -369,10 +369,7 @@ async function smartPolling(){
     const newRows = nuove
   .filter(p => p && p.row)
   .map(p => p.row);
-    const changed =
-      newRows.length !== snapshot.length ||
-      newRows.some(r => !snapshot.includes(r));
-
+    
     if (!changed) {
       isFetching = false;
       return;
