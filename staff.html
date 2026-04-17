@@ -175,7 +175,8 @@ button {
 
 /* ARRIVATO → azzurro soft */
 .card.arrivato {
-  background: rgba(33, 150, 243, 0.15);
+  background: #2196f3;
+  color: white;
 }
 
 /* CONFERMATA → bianco (default) */
@@ -233,8 +234,10 @@ button {
 <option value="cena">Cena</option>
 </select>
 </div>
-
-<div class="right">
+<button onclick="toggleForm()" id="addBtn" style="background:#4caf50;">
+  ➕ AGGIUNGI
+</button>
+<div class="right" id="formBox" style="display:none;">
 
 <b>➕ Nuova prenotazione</b>
 
@@ -468,6 +471,7 @@ await carica(); // ricarica tutto dal server
   nome.value = "";
   telefono.value = "";
   persone.value = "";
+    toggleForm();
 }
 
  
@@ -745,6 +749,18 @@ async function elimina(e,row){
   snapshot = snapshot.filter(r => r !== row); // 👈 IMPORTANTISSIMO
 
   render();
+}
+  function toggleForm(){
+  const box = document.getElementById("formBox");
+  const btn = document.getElementById("addBtn");
+
+  if (box.style.display === "none") {
+    box.style.display = "block";
+    btn.style.display = "none";
+  } else {
+    box.style.display = "none";
+    btn.style.display = "block";
+  }
 }
 </script>
 
