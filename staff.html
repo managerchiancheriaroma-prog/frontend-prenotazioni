@@ -376,7 +376,9 @@ async function smartPolling(){
     }
 
     // 🔔 nuova prenotazione
-const nuovi = nuove.filter(p => !snapshot.includes(p.row));
+const prevRows = new Set(snapshot.map(s => s.split("-")[0]));
+
+const nuovi = nuove.filter(p => !prevRows.has(String(p.row)));
 
 if (nuovi.length > 0) {
   const p = nuovi[0]; // prima nuova prenotazione
@@ -496,6 +498,10 @@ async function refreshSilenzioso() {
 
   const json = await res.json();
   const nuove = json.data || [];
+  if (!nuove.length) {
+  isFetching = false;
+  return;
+}
 
   const nuovi = nuove.filter(p => !snapshot.includes(p.row));
 
