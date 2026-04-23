@@ -307,6 +307,23 @@ let auth = null;
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
 
+  const ORARI = {
+  roma: {
+    default: [{ start: "12:30", end: "23:00" }],
+    sabato: [
+      { start: "12:30", end: "20:00" },
+      { start: "21:30", end: "23:00" }
+    ]
+  },
+
+  vairano: {
+    default: [{ start: "12:00", end: "22:00" }]
+  },
+
+  napoli: {
+    default: [{ start: "13:00", end: "23:30" }]
+  }
+};
 /* LOGIN */
 function login() {
   const r = loginRistorante.value;
@@ -432,7 +449,10 @@ async function carica() {
     alert("Compila i campi obbligatori");
     return;
   }
-
+if (!orarioValido(ristorante.value, data.value, oraVal)) {
+  alert("Orario non disponibile per le prenotazioni");
+  return;
+}
   const nuova = {
     ora: oraVal,
     nome: nomeVal,
@@ -500,7 +520,32 @@ async function refreshSilenzioso() {
 
   render();
 }
+function orarioValido(ristorante, dataStr, oraStr) {
+  if (!dataStr || !oraStr) return false;
 
+  const config = ORARI[ristorante];
+  if (!config) return true;
+
+  const giorno = new Date(dataStr).getDay(); // 0=dom, 6=sab
+
+  const [h, m] = oraStr.split(":").map(Number);
+  const minuti = h * 60 + m;
+
+  const fasce = (giorno === 6 && config.sabato)
+    ? config.sabato
+    : config.default;
+
+  return fasce.some(f => {
+    const [sh, sm] = f.start.split(":").map(Number);
+    const [eh, em] = f.end.split(":").map(Number);
+
+    const start = sh * 60 + sm;
+    const end = eh * 60 + em;
+
+    return minuti >= start && minuti <= end;
+  });
+}
+  
 function showToast(msg){
   toast.innerText = msg;
   toast.style.display="block";
