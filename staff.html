@@ -347,7 +347,7 @@ function start(){
   pollingTimer = setInterval(smartPolling, 4000);
 }
 async function smartPolling(){
-console.log("POLLING ATTIVO");
+
   if (isFetching) return;
   isFetching = true;
 
@@ -367,9 +367,8 @@ console.log("POLLING ATTIVO");
 
     if (!Array.isArray(nuove)) return;
 
-    // 🔔 rileva nuove prenotazioni (solo row)
+    // 🔔 nuove prenotazioni (sicuro)
     const prevRows = new Set(prenotazioni.map(p => p.row));
-
     const nuovi = nuove.filter(p => !prevRows.has(p.row));
 
     if (nuovi.length > 0) {
@@ -377,7 +376,20 @@ console.log("POLLING ATTIVO");
       showToast(`Nuova prenotazione\n${p.nome} (${p.persone} persone)`);
     }
 
-    // 🔄 aggiorna sempre (niente confronto)
+    // ✅ confronto leggero (solo lunghezza + row)
+    const changed =
+      nuove.length !== prenotazioni.length ||
+      nuove.some(n => {
+        const old = prenotazioni.find(p => p.row === n.row);
+        return !old || old.stato !== n.stato || old.tavolo !== n.tavolo;
+      });
+
+    if (!changed) {
+      isFetching = false;
+      return;
+    }
+
+    // 🔄 aggiorna solo se serve
     prenotazioni = nuove;
     prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
 
