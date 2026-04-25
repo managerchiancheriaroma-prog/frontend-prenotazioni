@@ -37,7 +37,24 @@ button {
 </head>
 
 <body>
-
+<div id="slotModal" style="
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:white;
+  border-top-left-radius:20px;
+  border-top-right-radius:20px;
+  padding:20px;
+  display:none;
+  z-index:9999;
+  max-height:70%;
+  overflow:auto;
+">
+  <h3>Seleziona orario</h3>
+  <div id="slotList" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+  <button onclick="chiudiSlot()">Chiudi</button>
+</div>
 <h2 id="titolo"></h2>
 
 <form id="form">
@@ -46,7 +63,17 @@ button {
 <input type="date" id="data" required>
 
 <label>Ora</label>
-<input type="time" id="ora" required>
+<div id="oraBtn" onclick="apriSlot()" style="
+  padding:12px;
+  background:#eee;
+  border-radius:8px;
+  text-align:center;
+  cursor:pointer;
+">
+  Seleziona orario
+</div>
+
+<input type="hidden" id="ora">
 
 <label>Nome</label>
 <input type="text" id="nome" required>
@@ -67,13 +94,110 @@ button {
 
 const API_URL = "/api/proxy";
 
+const ORARI = {
+  roma: {
+    default: [{ start: "12:30", end: "23:00" }],
+    sabato: [
+      { start: "12:30", end: "20:00" },
+      { start: "21:30", end: "23:00" }
+    ]
+  },
+
+  vairano: {
+    default: [{ start: "12:00", end: "22:00" }]
+  },
+
+  napoli: {
+    default: [{ start: "13:00", end: "23:30" }]
+  }
+};
 const params = new URLSearchParams(window.location.search);
 const ristorante = params.get("ristorante");
 
 titolo.innerText = ristorante ? "Prenota – " + ristorante : "Errore";
+function generaSlot() {
+  const selectedDate = new Date(data.value);
+  const oggi = new Date();
 
+  const config = ORARI[ristorante];
+  if (!config) return [];
+
+  const giorno = selectedDate.getDay();
+
+  const fasce = (giorno === 6 && config.sabato)
+    ? config.sabato
+    : config.default;
+
+  const slots = [];
+
+  fasce.forEach(f => {
+    let [h,m] = f.start.split(":").map(Number);
+    const [endH,endM] = f.end.split(":").map(Number);
+
+    while (h < endH || (h === endH && m <= endM)) {
+
+      const time = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+
+      // blocca orari passati
+      if (
+        selectedDate.toDateString() === oggi.toDateString() &&
+        time < oggi.toTimeString().slice(0,5)
+      ) {
+        m += 30;
+        if (m >= 60) { m = 0; h++; }
+        continue;
+      }
+
+      slots.push(time);
+
+      m += 30;
+      if (m >= 60) { m = 0; h++; }
+    }
+  });
+
+  return slots;
+}
+function apriSlot(){
+  const list = document.getElementById("slotList");
+  list.innerHTML = "";
+
+  const slots = generaSlot();
+
+  slots.forEach(s => {
+    const b = document.createElement("div");
+    b.innerText = s;
+
+    b.style = `
+      padding:10px 14px;
+      background:#f5f5f5;
+      border-radius:10px;
+      cursor:pointer;
+    `;
+
+    b.onclick = () => selezionaSlot(s);
+
+    list.appendChild(b);
+  });
+
+  slotModal.style.display = "block";
+}
+
+function selezionaSlot(s){
+  ora.value = s;
+  oraBtn.innerText = s;
+  chiudiSlot();
+}
+
+function chiudiSlot(){
+  slotModal.style.display = "none";
+}
+  
 async function prenota() {
-
+if (!ora.value) {
+  alert("Seleziona un orario");
+  return;
+}
+  
   const dati = {
     action:"prenota",
     ristorante,
