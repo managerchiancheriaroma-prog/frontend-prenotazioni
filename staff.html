@@ -131,7 +131,25 @@ h2 { text-align:center; }
   font-weight:bold;
   box-shadow:0 10px 30px rgba(0,0,0,0.3);
 }
-
+<div id="slotModal" style="
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:white;
+  border-top-left-radius:20px;
+  border-top-right-radius:20px;
+  padding:20px;
+  display:none;
+  z-index:9999;
+  max-height:70%;
+  overflow:auto;
+">
+  <h3>Seleziona orario</h3>
+  <div id="slotList" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+  <button onclick="chiudiSlot()">Chiudi</button>
+</div>
+  
 /* INPUT */
 .field { margin-top:10px; }
 .field label { font-size:13px; }
@@ -246,7 +264,19 @@ button {
 
 <div class="field">
 <label>Ora</label>
-<input type="time" id="ora">
+
+<div id="oraBtn" onclick="apriSlot()" style="
+  padding:12px;
+  background:#eee;
+  border-radius:8px;
+  text-align:center;
+  font-size:16px;
+  cursor:pointer;
+">
+  Seleziona orario
+</div>
+
+<input type="hidden" id="ora">
 </div>
 
 <div class="field">
@@ -556,6 +586,96 @@ function closeToast(){
   toast.style.display="none";
   overlay.style.display="none";
 }
+
+/* ===== SLOT ORARI ===== */
+
+function generaSlot() {
+  const r = ristorante.value;
+  const oggi = new Date();
+  const selectedDate = new Date(data.value);
+  const giorno = selectedDate.getDay(); // 0 domenica
+
+  let start = "12:30";
+  let end = "23:00";
+  let pauseStart = null;
+  let pauseEnd = null;
+
+  if (r === "roma") {
+    if (giorno === 6) { // sabato
+      pauseStart = "20:00";
+      pauseEnd = "21:30";
+    }
+  }
+
+  const slots = [];
+
+  function pushSlot(h, m){
+    const time = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+
+    if (pauseStart && time >= pauseStart && time < pauseEnd) return;
+
+    if (
+      selectedDate.toDateString() === oggi.toDateString() &&
+      time < oggi.toTimeString().slice(0,5)
+    ) return;
+
+    slots.push(time);
+  }
+
+  let [h,m] = start.split(":").map(Number);
+  const [endH,endM] = end.split(":").map(Number);
+
+  while (h < endH || (h === endH && m <= endM)) {
+    pushSlot(h,m);
+
+    m += 30;
+    if (m >= 60) {
+      m = 0;
+      h++;
+    }
+  }
+
+  return slots;
+}
+/* ===== MODAL SLOT ===== */
+
+function apriSlot(){
+  const list = document.getElementById("slotList");
+  list.innerHTML = "";
+
+  const slots = generaSlot();
+
+  slots.forEach(s => {
+    const b = document.createElement("div");
+    b.innerText = s;
+
+    b.style = `
+      padding:10px 14px;
+      background:#f5f5f5;
+      border-radius:10px;
+      cursor:pointer;
+    `;
+
+    b.onclick = () => selezionaSlot(s);
+
+    list.appendChild(b);
+  });
+
+  slotModal.style.display = "block";
+}
+
+  function selezionaSlot(s){
+  ora.value = s;
+  oraBtn.innerText = s;
+  chiudiSlot();
+}
+
+function chiudiSlot(){
+  slotModal.style.display = "none";
+}
+
+  
+  
 
 function render(){
   renderLista();
