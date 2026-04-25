@@ -131,24 +131,7 @@ h2 { text-align:center; }
   font-weight:bold;
   box-shadow:0 10px 30px rgba(0,0,0,0.3);
 }
-<div id="slotModal" style="
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:white;
-  border-top-left-radius:20px;
-  border-top-right-radius:20px;
-  padding:20px;
-  display:none;
-  z-index:9999;
-  max-height:70%;
-  overflow:auto;
-">
-  <h3>Seleziona orario</h3>
-  <div id="slotList" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
-  <button onclick="chiudiSlot()">Chiudi</button>
-</div>
+
   
 /* INPUT */
 .field { margin-top:10px; }
@@ -215,7 +198,25 @@ button {
 </head>
 
 <body>
-
+<div id="slotModal" style="
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:white;
+  border-top-left-radius:20px;
+  border-top-right-radius:20px;
+  padding:20px;
+  display:none;
+  z-index:9999;
+  max-height:70%;
+  overflow:auto;
+">
+  <h3>Seleziona orario</h3>
+  <div id="slotList" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+  <button onclick="chiudiSlot()">Chiudi</button>
+</div>
+  
 <div id="loginScreen">
   <div class="loginBox">
     <h3>Login Staff</h3>
@@ -591,49 +592,44 @@ function closeToast(){
 
 function generaSlot() {
   const r = ristorante.value;
-  const oggi = new Date();
   const selectedDate = new Date(data.value);
-  const giorno = selectedDate.getDay(); // 0 domenica
+  const oggi = new Date();
 
-  let start = "12:30";
-  let end = "23:00";
-  let pauseStart = null;
-  let pauseEnd = null;
+  const config = ORARI[r];
+  if (!config) return [];
 
-  if (r === "roma") {
-    if (giorno === 6) { // sabato
-      pauseStart = "20:00";
-      pauseEnd = "21:30";
-    }
-  }
+  const giorno = selectedDate.getDay();
+
+  const fasce = (giorno === 6 && config.sabato)
+    ? config.sabato
+    : config.default;
 
   const slots = [];
 
-  function pushSlot(h, m){
-    const time = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  fasce.forEach(f => {
+    let [h,m] = f.start.split(":").map(Number);
+    const [endH,endM] = f.end.split(":").map(Number);
 
-    if (pauseStart && time >= pauseStart && time < pauseEnd) return;
+    while (h < endH || (h === endH && m <= endM)) {
 
-    if (
-      selectedDate.toDateString() === oggi.toDateString() &&
-      time < oggi.toTimeString().slice(0,5)
-    ) return;
+      const time = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 
-    slots.push(time);
-  }
+      // blocca orari passati oggi
+      if (
+        selectedDate.toDateString() === oggi.toDateString() &&
+        time < oggi.toTimeString().slice(0,5)
+      ) {
+        m += 30;
+        if (m >= 60) { m = 0; h++; }
+        continue;
+      }
 
-  let [h,m] = start.split(":").map(Number);
-  const [endH,endM] = end.split(":").map(Number);
+      slots.push(time);
 
-  while (h < endH || (h === endH && m <= endM)) {
-    pushSlot(h,m);
-
-    m += 30;
-    if (m >= 60) {
-      m = 0;
-      h++;
+      m += 30;
+      if (m >= 60) { m = 0; h++; }
     }
-  }
+  });
 
   return slots;
 }
