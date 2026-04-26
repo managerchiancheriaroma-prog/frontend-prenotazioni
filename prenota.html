@@ -12,7 +12,9 @@ body {
   margin:0;
   box-sizing:border-box;
 }
-
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 /* INPUT */
 label {
   display:block;
@@ -21,9 +23,9 @@ label {
 
 input, button {
   width:100%;
-  padding:18px;
+  padding:16px;
   margin-top:8px;
-  font-size:18px;
+  font-size:17px;
    border-radius:12px;
 }
 
@@ -92,9 +94,9 @@ button {
 
 /* SLOT */
 .slot-btn {
-  padding:24px 0;
-  font-size:22px;
-  border-radius:16px;
+  padding:20px 0;
+  font-size:20px;
+  border-radius:14px;
   text-align:center;
   border-radius:14px;
   background:#f5f5f5;
