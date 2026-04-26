@@ -5,17 +5,7 @@
   <title>Scegli Ristorante</title>
 
   <style>
-h2 {
-  font-size: 6vw;
-  font-weight: 1900;
 
-  text-align: center;
-
-  margin: 24px 0 18px 0;
-
-  color: #111;
-}
-    
 #bgLogo {
   position: fixed;
   top: 0;
@@ -99,7 +89,26 @@ html, body {
 .restaurant-btn:active {
   transform: scale(0.97);
   background: #222;
-}  </style>
+}
+  .hero {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.hero h1 {
+  font-size: 9vw;
+  font-weight: 900;
+  margin: 0;
+  color: #111;
+}
+
+.hero p {
+  font-size: 4.5vw;
+  margin-top: 10px;
+  color: #555;
+}
+  
+  </style>
 </head>
 
 <body>
@@ -108,7 +117,10 @@ html, body {
 
 <div class="container">
 
-<h2>Scegli il ristorante</h2>
+<div class="hero">
+  <h1>Scegli il ristorante</h1>
+  <p>Prenota in pochi secondi</p>
+</div>
 
 <a class="restaurant-btn" href="prenota.html?ristorante=roma">Roma</a>
 <a class="restaurant-btn" href="prenota.html?ristorante=vairano">Vairano</a>
