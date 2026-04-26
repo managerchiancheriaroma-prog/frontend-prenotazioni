@@ -5,6 +5,17 @@
   <title>Scegli Ristorante</title>
 
   <style>
+h2 {
+  font-size: 34px;
+  font-weight: 900;
+
+  text-align: center;
+
+  margin: 24px 0 18px 0;
+
+  color: #111;
+}
+    
 #bgLogo {
   position: fixed;
   top: 0;
@@ -34,6 +45,9 @@ body {
 
   background: white;
 }
+    body {
+  -webkit-tap-highlight-color: transparent;
+}
 html, body {
   height: 100%;
 }
@@ -46,11 +60,13 @@ html, body {
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
 
-  gap: 16px;
+  align-items: center;
 
   padding: 16px;
+  box-sizing: border-box;
+
+  gap: 18px;
 }
 
 .restaurant-btn {
