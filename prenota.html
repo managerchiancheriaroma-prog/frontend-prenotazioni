@@ -135,18 +135,14 @@ button {
 /* SFONDO LOGO */
 #bgLogo {
   position: fixed;
-  top: 0;
-  left: 0;
-
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
 
   background-image: url("./logo.png");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: contain;
+  background-size: 80vh; /* più stabile su mobile */
 
-  opacity: 0.08;
+  opacity: 0.06;
 
   z-index: 0;
   pointer-events: none;
