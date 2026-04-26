@@ -41,50 +41,47 @@ html, body {
   position: relative;
   z-index: 1;
 
+  width: 100%;
+  height: 100vh;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  justify-content: center;
+
+  gap: 16px;
+
+  padding: 16px;
 }
 
 .restaurant-btn {
-  width: 92%;
-  max-width: 420px;
+  width: 100%;
 
-  padding: 28px 24px;
-
-  margin: 14px auto;
-
-  font-size: 24px;
-  font-weight: 700;
-
-  text-align: center;
-
-  background: #111;
-  color: white;
-
-  border-radius: 18px;
-
-  text-decoration: none;
-
-  cursor: pointer;
-
-  /* 🔥 migliora touch mobile */
-  min-height: 70px;
+  height: 22vh; /* 🔥 ogni bottone prende 22% schermo */
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  transition: transform 0.1s ease, background 0.2s ease;
+  font-size: 28px;
+  font-weight: 800;
+
+  background: #111;
+  color: white;
+
+  border-radius: 20px;
+
+  text-decoration: none;
+
+  cursor: pointer;
+
+  transition: transform 0.15s ease, background 0.2s ease;
 }
 
-/* effetto pressione (molto importante su mobile) */
+/* effetto touch */
 .restaurant-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
   background: #222;
-}
-  </style>
+}  </style>
 </head>
 
 <body>
