@@ -29,12 +29,15 @@ label {
   margin-top:15px;
 }
 
-input, button {
+input,
+button,
+textarea {
   width:100%;
   padding:16px;
   margin-top:8px;
   font-size:17px;
-   border-radius:12px;
+  border-radius:12px;
+  box-sizing:border-box;
 }
 
 button {
@@ -159,6 +162,11 @@ button {
   width: 120%;
   max-width: 900px;
   opacity: 0.06;
+}
+  textarea {
+  min-height: 90px;
+  resize: none;
+  font-family: Arial;
 }
 </style>
 </head>
