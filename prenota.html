@@ -14,7 +14,7 @@ body {
 
   /* SFONDO LOGO */
   background-image: url("logo.png"); /* 👈 cambia nome file */
-  background-size: cover;
+  background-size: 300%; /* prova 150% - 200% */
   background-position: center;
   background-repeat: no-repeat;
 }
@@ -26,7 +26,7 @@ body::before {
   width:100%;
   height:100%;
 
-  background: rgba(0,0,0,0.55); /* 👈 opacità (0.3 più chiaro, 0.7 più scuro) */
+  background: rgba(0,0,0,0.35); /* 👈 opacità (0.3 più chiaro, 0.7 più scuro) */
 
   z-index:0;
 }
@@ -137,8 +137,8 @@ button {
   margin: auto;
   margin-top: 20px;
 
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(6px);
+  background: rgba(255,255,255,0.80);
+  backdrop-filter: blur(10px);
 
   padding:16px;
   border-radius:18px;
