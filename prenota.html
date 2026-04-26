@@ -13,18 +13,22 @@ body {
   box-sizing:border-box;
   position: relative;
   min-height: 100vh;
+  background: white;
 }
 
 /* SFONDO LOGO */
 #bgLogo {
   position: fixed;
   inset: 0;
+
   background-image: url("logo.png");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 120%;
-  opacity: 0.12;
-  z-index: 0;
+  background-size: 160%;
+
+  opacity: 0.10;
+
+  z-index: -1; /* 🔥 QUESTO è il cambio chiave */
   pointer-events: none;
 }
 *, *::before, *::after {
@@ -125,9 +129,11 @@ button {
   color:white;
   text-align:center;
 }
-  .container {
+.container {
+  background: rgba(255,255,255,0.92);
   position: relative;
   z-index: 1;
+}
 
   max-width: 420px;
   margin: auto;
