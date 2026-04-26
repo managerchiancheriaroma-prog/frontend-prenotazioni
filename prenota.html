@@ -15,7 +15,9 @@ body {
   min-height: 100vh;
   background: white;
 }
-
+html, body {
+  height: 100%;
+}
 /* SFONDO LOGO */
 
 *, *::before, *::after {
@@ -135,15 +137,24 @@ button {
 /* SFONDO LOGO */
 #bgLogo {
   position: fixed;
-  inset: 0;
-  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  background-image: url("./logo.png");
+  background-repeat: no-repeat;
+
+  /* 🔥 chiave: NON contain, NON %, usa cover */
+  background-size: cover;
+
+  background-position: center;
+
+  opacity: 0.08;
+
+  z-index: -1;
   pointer-events: none;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
-
 #bgLogo img {
   width: 120%;
   max-width: 900px;
