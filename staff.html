@@ -295,6 +295,11 @@ button {
 <input type="number" id="persone">
 </div>
 
+<div class="field">
+<label>Note (facoltativo)</label>
+<input type="text" id="note" placeholder="Es: allergia, tavolo esterno...">
+</div>
+  
 <button onclick="aggiungi()">Aggiungi</button>
 
 </div>
@@ -484,12 +489,13 @@ if (!orarioValido(ristorante.value, data.value, oraVal)) {
   alert("Orario non disponibile per le prenotazioni");
   return;
 }
-  const nuova = {
-    ora: oraVal,
-    nome: nomeVal,
-    telefono: telefonoVal,
-    persone: personeVal
-  };
+const nuova = {
+  ora: oraVal,
+  nome: nomeVal,
+  telefono: telefonoVal,
+  persone: personeVal,
+  note: note.value || ""
+};
 
   const res = await fetch(API_URL,{
     method:"POST",
@@ -516,6 +522,7 @@ await carica(); // ricarica tutto dal server
   nome.value = "";
   telefono.value = "";
   persone.value = "";
+  note.value = "";
     toggleForm();
 }
 
@@ -746,6 +753,19 @@ color:${p.tavolo ? "#1976d2" : "#666"};
   ">
     👥 ${p.persone} coperti
   </div>
+
+${p.note ? `
+<div style="
+  margin-top:6px;
+  font-size:14px;
+  padding:8px;
+  background:#f3f3f3;
+  border-radius:10px;
+  color:#333;
+">
+  📝 ${p.note}
+</div>
+` : ""}
 
   <!-- BOTTONI IN FILA ORIZZONTALE -->
   <div style="
