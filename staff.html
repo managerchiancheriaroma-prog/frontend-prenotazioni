@@ -258,7 +258,7 @@ button {
 </div>
 <div style="display:flex; gap:10px;">
 
-  <button onclick="toggleForm()" id="addBtn" style="
+  <button onclick="toggleForm()" style="
     flex:1;
     background:#4caf50;
   ">
@@ -273,7 +273,7 @@ button {
   </button>
 
 </div>
-<div class="right" id="formBox" style="display:none;">
+  <div class="right" id="formBox" style="display:none;">
 <div class="right" id="walkinBox" style="display:none;">
 
 <b>🚶 Walk-in veloce</b>
@@ -992,29 +992,28 @@ async function elimina(e,row){
 
   render();
 }
-  function toggleForm(){
+function toggleForm(){
   const box = document.getElementById("formBox");
-  const btn = document.getElementById("addBtn");
+  const walk = document.getElementById("walkinBox");
 
-  if (box.style.display === "none") {
-    box.style.display = "block";
-    btn.style.display = "none";
-  } else {
-    box.style.display = "none";
-    btn.style.display = "block";
-  }
+  // chiudi walk-in se aperto
+  walk.style.display = "none";
+
+  box.style.display = box.style.display === "block"
+    ? "none"
+    : "block";
 }
-  function toggleWalkin(){
-  const box = document.getElementById("walkinBox");
-  const btn = document.getElementById("addBtn");
 
-  if (box.style.display === "none") {
-    box.style.display = "block";
-    btn.style.display = "none";
-  } else {
-    box.style.display = "none";
-    btn.style.display = "block";
-  }
+function toggleWalkin(){
+  const box = document.getElementById("walkinBox");
+  const form = document.getElementById("formBox");
+
+  // chiudi form normale se aperto
+  form.style.display = "none";
+
+  box.style.display = box.style.display === "block"
+    ? "none"
+    : "block";
 }
 </script>
 
