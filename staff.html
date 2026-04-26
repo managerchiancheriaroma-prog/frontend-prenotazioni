@@ -256,11 +256,57 @@ button {
 <option value="cena">Cena</option>
 </select>
 </div>
-<button onclick="toggleForm()" id="addBtn" style="background:#4caf50;">
-  ➕ AGGIUNGI
-</button>
-<div class="right" id="formBox" style="display:none;">
+<div style="display:flex; gap:10px;">
 
+  <button onclick="toggleForm()" id="addBtn" style="
+    flex:1;
+    background:#4caf50;
+  ">
+    ➕ AGGIUNGI
+  </button>
+
+  <button onclick="toggleWalkin()" style="
+    flex:1;
+    background:#ff9800;
+  ">
+    🚶 WALK IN
+  </button>
+
+</div>
+<div class="right" id="formBox" style="display:none;">
+<div class="right" id="walkinBox" style="display:none;">
+
+<b>🚶 Walk-in veloce</b>
+
+<div class="field">
+<label>Ora</label>
+<div id="oraBtnWalk" onclick="apriSlotWalk()" style="
+  padding:12px;
+  background:#eee;
+  border-radius:8px;
+  text-align:center;
+  font-size:16px;
+  cursor:pointer;
+">
+  Seleziona orario
+</div>
+<input type="hidden" id="oraWalk">
+</div>
+
+<div class="field">
+<label>Numero persone</label>
+<input type="number" id="personeWalk">
+</div>
+
+<div class="field">
+<label>Tavolo</label>
+<input type="number" id="tavoloWalk">
+</div>
+
+<button onclick="aggiungiWalkin()">Assegna Walk-in</button>
+
+</div>
+  
 <b>➕ Nuova prenotazione</b>
 
 <div class="field">
@@ -948,6 +994,18 @@ async function elimina(e,row){
 }
   function toggleForm(){
   const box = document.getElementById("formBox");
+  const btn = document.getElementById("addBtn");
+
+  if (box.style.display === "none") {
+    box.style.display = "block";
+    btn.style.display = "none";
+  } else {
+    box.style.display = "none";
+    btn.style.display = "block";
+  }
+}
+  function toggleWalkin(){
+  const box = document.getElementById("walkinBox");
   const btn = document.getElementById("addBtn");
 
   if (box.style.display === "none") {
