@@ -139,21 +139,19 @@ button {
   padding:16px;
   border-radius:18px;
 }
-  #bgLogo {
+#bgLogo {
   position: fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
+  inset: 0;
 
-  background-image: url("https://via.placeholder.com/800");
-  background-size: 200%; /* 👈 regola qui */
+  background-image: url("./logo.png");
+  background-size: 200%;
   background-position: center;
   background-repeat: no-repeat;
 
-  opacity: 0.15; /* 👈 controlla visibilità */
+  opacity: 0.12;
 
   z-index: 0;
+  pointer-events: none;
 }
 </style>
 </head>
