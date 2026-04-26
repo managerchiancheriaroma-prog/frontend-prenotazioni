@@ -136,23 +136,26 @@ button {
 #bgLogo {
   position: fixed;
   inset: 0;
-
-  background-image: url("https://frontend-prenotazioni.vercel.app/logo.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-
-  opacity: 0.08;
-
   z-index: 0;
   pointer-events: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+#bgLogo img {
+  width: 120%;
+  max-width: 900px;
+  opacity: 0.06;
+}
 </style>
 </head>
 
 <body>
-  <div id="bgLogo"></div>
+  <div id="bgLogo">
+  <img src="/logo.png" alt="logo background">
+</div>
 <div id="slotModal">
   <div class="slot-header">
     Seleziona orario
