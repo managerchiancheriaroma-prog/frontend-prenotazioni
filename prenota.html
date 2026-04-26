@@ -210,6 +210,9 @@ button {
 <label>Persone</label>
 <input type="number" id="persone" required>
 
+<label>Note (facoltative)</label>
+<textarea id="note" placeholder="Es: allergie, richiesta tavolo, ecc..."></textarea>
+
 <button type="button" onclick="prenota()">Prenota</button>
 
 </form>
@@ -334,15 +337,16 @@ if (!ora.value) {
   return;
 }
   
-  const dati = {
-    action:"prenota",
-    ristorante,
-    data:data.value,
-    ora:ora.value,
-    nome:nome.value,
-    telefono:telefono.value,
-    persone:Number(persone.value)
-  };
+const dati = {
+  action:"prenota",
+  ristorante,
+  data:data.value,
+  ora:ora.value,
+  nome:nome.value,
+  telefono:telefono.value,
+  persone:Number(persone.value),
+  note: note.value
+};
 
   const res = await fetch(API_URL,{
     method:"POST",
