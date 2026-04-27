@@ -941,7 +941,21 @@ el.innerHTML = `
   ">
     👥 ${p.persone} coperti
   </div>
-
+${p.telefono ? `
+<div style="
+  margin-top:6px;
+  font-size:14px;
+  padding:8px;
+  background:#e8f5e9;
+  border-radius:10px;
+  color:#2e7d32;
+  font-weight:600;
+">
+  📞 <a href="tel:${p.telefono}" style="color:#2e7d32; text-decoration:none;">
+    ${p.telefono}
+  </a>
+</div>
+` : ""}
 ${p.note ? `
 <div style="
   margin-top:6px;
