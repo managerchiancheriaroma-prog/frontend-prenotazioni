@@ -59,14 +59,26 @@ h2 { text-align:center; }
 
 /* CARD */
 .card {
-  background:white;
-  padding:14px;
+  background: linear-gradient(145deg, #ffffff, #f1f1f1);
+  padding:16px;
   margin-top:12px;
-  border-radius:16px;
+  border-radius:18px;
   font-size:14px;
   cursor:pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transition: 0.2s;
+
+  box-shadow:
+    0 6px 20px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+
+  transition: all 0.25s ease;
+  border:1px solid rgba(0,0,0,0.05);
+}
+
+  .card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 12px 30px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.6);
 }
 
 .card:active {
@@ -176,25 +188,24 @@ button {
 
 /* ARRIVATO → azzurro soft */
 .card.arrivato {
-  background: rgba(33, 150, 243, 0.25);
-  color: #0d47a1;
+  background: linear-gradient(135deg, #bbdefb, #e3f2fd);
+  color:#0d47a1;
 }
 
-/* CONFERMATA → bianco (default) */
 .card.confermato {
-  background: white;
+  background: linear-gradient(135deg, #ffffff, #f5f5f5);
 }
 
-/* LIBERA → grigio */
+.card.pending-row {
+  background: linear-gradient(135deg, #ffcc80, #ff9800);
+  color:white;
+}
+
 .card.faded {
-  opacity: 0.4;
-  filter: grayscale(40%);
-}
- .card.pending-row {
-  background: #ff9800;
-  color: white;
-}
-  #editModal {
+  opacity: 0.45;
+  filter: grayscale(50%);
+  
+}  #editModal {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -886,9 +897,14 @@ else if (stato === "PENDING") {
 el.innerHTML = `
   <div style="display:flex; justify-content:space-between; align-items:center;">
 
-    <div style="font-size:22px; font-weight:800; color:#333;">
-      ${p.ora}
-    </div>
+    <div style="
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:1px;
+  color:#111;
+">
+  ${p.ora}
+</div>
 
 <div style="display:flex; gap:8px; align-items:center;">
 
@@ -924,49 +940,66 @@ el.innerHTML = `
 
 </div>
   </div>
+<div style="
+  font-size:12px;
+  font-weight:800;
+  margin-top:6px;
+  color:${p.stato === "ARRIVATO" ? "#0d47a1" :
+         p.stato === "CONFERMATA" ? "#2e7d32" :
+         p.stato === "PENDING" ? "#e65100" : "#777"};
+">
+  ${p.stato}
+</div>
 
   <!-- NOME PIÙ VISIBILE -->
   <div style="
-    margin-top:8px;
-    font-size:18px;
-    font-weight:800;
-    color:#111;
-  ">
-    ${p.nome}
-  </div>
+  margin-top:10px;
+  font-size:20px;
+  font-weight:900;
+  color:#111;
+  letter-spacing:0.5px;
+">
+  ${p.nome}
+</div>
 
   <!-- COPERTI PIÙ GRANDI E CENTRATI -->
-  <div style="
-    margin-top:4px;
-    font-size:16px;
-    font-weight:700;
-    text-align:center;
-    color:#444;
-  ">
-    👥 ${p.persone} coperti
-  </div>
-${p.telefono ? `
 <div style="
   margin-top:6px;
+  display:inline-block;
+  background:#eeeeee;
+  padding:6px 12px;
+  border-radius:20px;
   font-size:14px;
-  padding:8px;
-  background:#e8f5e9;
-  border-radius:10px;
-  color:#2e7d32;
-  font-weight:600;
+  font-weight:700;
+  color:#333;
 ">
-  📞 <a href="tel:${p.telefono}" style="color:#2e7d32; text-decoration:none;">
+  👥 ${p.persone}
+</div>
+${p.telefono ? `
+<div style="
+  margin-top:8px;
+  padding:10px;
+  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+  border-radius:12px;
+  font-size:15px;
+  font-weight:700;
+  text-align:center;
+">
+  📞 <a href="tel:${p.telefono}" style="color:#1b5e20; text-decoration:none;">
     ${p.telefono}
   </a>
 </div>
 ` : ""}
+
 ${p.note ? `
 <div style="
-  margin-top:6px;
-  font-size:14px;
-  padding:8px;
-  background:#f3f3f3;
+  margin-top:8px;
+  padding:10px;
+  background:#fafafa;
+  border-left:4px solid #2196f3;
   border-radius:10px;
+  font-size:14px;
+  font-style:italic;
   color:#333;
 ">
   📝 ${p.note}
