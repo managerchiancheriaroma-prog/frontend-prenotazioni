@@ -387,7 +387,8 @@ let prenotazioni = [];
 let selezionata = null;
 let snapshot = [];
 let auth = null;
-
+let ignoreNextToast = false;
+  
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
 
@@ -472,10 +473,10 @@ async function smartPolling(){
     const prevRows = new Set(prenotazioni.map(p => p.row));
     const nuovi = nuove.filter(p => !prevRows.has(p.row));
 
-    if (nuovi.length > 0) {
-      const p = nuovi[0];
-      showToast(`Nuova prenotazione\n${p.nome} (${p.persone} persone)`);
-    }
+if (nuovi.length > 0 && !ignoreNextToast) {
+  const p = nuovi[0];
+  showToast(`Nuova prenotazione\n${p.nome} (${p.persone} persone)`);
+}
 
     // ✅ confronto leggero (solo lunghezza + row)
     const changed =
@@ -486,6 +487,7 @@ async function smartPolling(){
       });
 
     if (!changed) {
+     ignoreNextToast = false;
       isFetching = false;
       return;
     }
@@ -564,7 +566,8 @@ const nuova = {
     return;
   }
 
-await carica(); // ricarica tutto dal server
+ignoreNextToast = true;
+await carica();
 
   ora.value = "";
   nome.value = "";
@@ -1080,7 +1083,8 @@ function toggleWalkin(){
     return;
   }
 
-  await carica();
+  ignoreNextToast = true;
+await carica();
 
   // reset campi
   oraWalk.value = "";
