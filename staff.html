@@ -1046,6 +1046,50 @@ function toggleWalkin(){
     ? "none"
     : "block";
 }
+  async function aggiungiWalkin(){
+  const oraVal = oraWalk.value;
+  const personeVal = personeWalk.value;
+  const tavoloVal = tavoloWalk.value;
+
+  if (!oraVal || !personeVal || !tavoloVal) {
+    alert("Compila tutti i campi");
+    return;
+  }
+
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"aggiungiPrenotazioneStaff",
+      ristorante: ristorante.value,
+      data: data.value,
+      ora: oraVal,
+      nome: "WALK-IN",
+      telefono: "",
+      persone: personeVal,
+      tavolo: tavoloVal,
+      stato: "ARRIVATO",
+      note: "Walk-in"
+    })
+  });
+
+  const json = await res.json();
+
+  if (!json.success) {
+    alert("Errore salvataggio walk-in");
+    return;
+  }
+
+  await carica();
+
+  // reset campi
+  oraWalk.value = "";
+  personeWalk.value = "";
+  tavoloWalk.value = "";
+  oraBtnWalk.innerText = "Seleziona orario";
+
+  toggleWalkin();
+}
 </script>
 
 </body>
