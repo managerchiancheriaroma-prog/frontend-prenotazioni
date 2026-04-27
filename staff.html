@@ -602,7 +602,10 @@ async function carica() {
     })
   });
    const json = await res.json();
-  prenotazioni = json.data || [];
+ prenotazioni = (json.data || []).map(p => ({
+  ...p,
+  note: p.note || p.notes || p.Note || ""
+}));
  snapshot = prenotazioni.map(p =>
   `${p.row}-${p.stato}-${p.tavolo}`
 );
