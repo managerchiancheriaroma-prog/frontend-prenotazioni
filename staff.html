@@ -372,7 +372,63 @@ button {
 </div>
 
 </div>
+<div id="editModal" style="
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:white;
+  border-top-left-radius:20px;
+  border-top-right-radius:20px;
+  padding:20px;
+  display:none;
+  z-index:10000;
+  max-height:75%;
+  overflow:auto;
+">
 
+  <h3>✏️ Modifica prenotazione</h3>
+
+  <div class="field">
+    <label>Ora</label>
+    <input type="time" id="editOra">
+  </div>
+
+  <div class="field">
+    <label>Nome</label>
+    <input type="text" id="editNome">
+  </div>
+
+  <div class="field">
+    <label>Telefono</label>
+    <input type="text" id="editTelefono">
+  </div>
+
+  <div class="field">
+    <label>Persone</label>
+    <input type="number" id="editPersone">
+  </div>
+
+  <div class="field">
+    <label>Note</label>
+    <input type="text" id="editNote">
+  </div>
+
+  <button onclick="salvaModifica()" style="
+    width:100%;
+    background:#2196f3;
+  ">
+    💾 Salva modifiche
+  </button>
+
+  <button onclick="chiudiModifica()" style="
+    width:100%;
+    background:#999;
+  ">
+    Chiudi
+  </button>
+
+</div>
 <script>
 
 const API_URL = "/api/proxy";
@@ -385,6 +441,7 @@ const PASSWORDS = {
 
 let prenotazioni = [];
 let selezionata = null;
+  let editRow = null;
 let snapshot = [];
 let auth = null;
 let ignoreNextToast = false;
@@ -801,15 +858,38 @@ el.innerHTML = `
       ${p.ora}
     </div>
 
-<div style="
-  font-size:16px;
-  font-weight:700;
-  background:${p.tavolo ? "#e3f2fd" : "#eee"};
-color:${p.tavolo ? "#1976d2" : "#666"};
-  padding:6px 12px;
-  border-radius:20px;
-">
-  T${p.tavolo || "-"}
+<div style="display:flex; gap:8px; align-items:center;">
+
+  <!-- TAVOLO -->
+  <div style="
+    font-size:16px;
+    font-weight:700;
+    background:${p.tavolo ? "#e3f2fd" : "#eee"};
+    color:${p.tavolo ? "#1976d2" : "#666"};
+    padding:6px 12px;
+    border-radius:20px;
+    min-width:50px;
+    text-align:center;
+  ">
+    T${p.tavolo || "-"}
+  </div>
+
+  <!-- MATITA -->
+  <div onclick="apriModifica(${p.row})" style="
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:#f1f1f1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-size:14px;
+    user-select:none;
+  ">
+    ✏️
+  </div>
+
 </div>
   </div>
 
@@ -1093,6 +1173,60 @@ await carica();
   oraBtnWalk.innerText = "Seleziona orario";
 
   toggleWalkin();
+}
+  function apriModifica(row){
+
+  const p = prenotazioni.find(x => x.row === row);
+  if (!p) return;
+
+  editRow = row;
+
+  editOra.value = p.ora;
+  editNome.value = p.nome;
+  editTelefono.value = p.telefono;
+  editPersone.value = p.persone;
+  editNote.value = p.note || "";
+
+  editModal.style.display = "block";
+}
+  function chiudiModifica(){
+  editModal.style.display = "none";
+  editRow = null;
+}
+  async function salvaModifica(){
+
+  if (!editRow) return;
+
+  const patch = {
+    ora: editOra.value,
+    nome: editNome.value,
+    telefono: editTelefono.value,
+    persone: editPersone.value,
+    note: editNote.value
+  };
+
+  // update UI locale immediata
+  const p = prenotazioni.find(x => x.row === editRow);
+  if (p) {
+    Object.assign(p, patch);
+  }
+
+  render();
+  chiudiModifica();
+
+  // update server
+  await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"modificaPrenotazione",
+      ristorante: ristorante.value,
+      row: editRow,
+      ...patch
+    })
+  });
+
+  editRow = null;
 }
 </script>
 
