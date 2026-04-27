@@ -273,41 +273,8 @@ button {
   </button>
 
 </div>
-  <div class="right" id="formBox" style="display:none;">
+<div class="right" id="formBox" style="display:none;">
 
-</div>
-  <div class="right" id="walkinBox" style="display:none;">
-
-<b>🚶 Walk-in veloce</b>
-
-<div class="field">
-<label>Ora</label>
-<div id="oraBtnWalk" onclick="apriSlotWalk()" style="
-  padding:12px;
-  background:#eee;
-  border-radius:8px;
-  text-align:center;
-  font-size:16px;
-  cursor:pointer;
-">
-  Seleziona orario
-</div>
-<input type="hidden" id="oraWalk">
-
-<div class="field">
-<label>Numero persone</label>
-<input type="number" id="personeWalk">
-</div>
-
-<div class="field">
-<label>Tavolo</label>
-<input type="number" id="tavoloWalk">
-</div>
-
-<button onclick="aggiungiWalkin()">Assegna Walk-in</button>
-
-</div>
-  
 <b>➕ Nuova prenotazione</b>
 
 <div class="field">
@@ -344,12 +311,46 @@ button {
 
 <div class="field">
 <label>Note (facoltativo)</label>
-<input type="text" id="note" placeholder="Es: allergia, tavolo esterno...">
+<input type="text" id="note">
 </div>
-  
+
 <button onclick="aggiungi()">Aggiungi</button>
 
 </div>
+
+
+<div class="right" id="walkinBox" style="display:none;">
+
+<b>🚶 Walk-in veloce</b>
+
+<div class="field">
+<label>Ora</label>
+
+<div id="oraBtnWalk" onclick="apriSlotWalk()" style="
+  padding:12px;
+  background:#eee;
+  border-radius:8px;
+  text-align:center;
+  font-size:16px;
+  cursor:pointer;
+">
+  Seleziona orario
+</div>
+
+<input type="hidden" id="oraWalk">
+</div>
+
+<div class="field">
+<label>Numero persone</label>
+<input type="number" id="personeWalk">
+</div>
+
+<div class="field">
+<label>Tavolo</label>
+<input type="number" id="tavoloWalk">
+</div>
+
+<button onclick="aggiungiWalkin()">Assegna Walk-in</button>
 
 </div>
 
@@ -714,6 +715,35 @@ function apriSlot(){
   slotModal.style.display = "block";
 }
 
+function apriSlotWalk(){
+  const list = document.getElementById("slotList");
+  list.innerHTML = "";
+
+  const slots = generaSlot();
+
+  slots.forEach(s => {
+    const b = document.createElement("div");
+    b.innerText = s;
+
+    b.style = `
+      padding:10px 14px;
+      background:#f5f5f5;
+      border-radius:10px;
+      cursor:pointer;
+    `;
+
+    b.onclick = () => {
+      oraWalk.value = s;
+      oraBtnWalk.innerText = s;
+      chiudiSlot();
+    };
+
+    list.appendChild(b);
+  });
+
+  slotModal.style.display = "block";
+}
+  
   function selezionaSlot(s){
   ora.value = s;
   oraBtn.innerText = s;
