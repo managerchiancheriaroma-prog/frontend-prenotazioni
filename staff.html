@@ -550,6 +550,7 @@ async function smartPolling(){
     });
 
     const json = await res.json();
+    console.log("RAW SERVER:", json.data);
     const nuove = json.data || [];
 
     if (!Array.isArray(nuove)) return;
