@@ -461,6 +461,7 @@ let selezionata = null;
 let snapshot = [];
 let auth = null;
 let ignoreNextToast = false;
+const editModal = document.getElementById("editModal");
   
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
@@ -891,7 +892,7 @@ el.innerHTML = `
   </div>
 
   <!-- MATITA -->
-  <div onclick="apriModifica(${p.row})" style="
+  <div onclick="event.stopPropagation(); apriModifica(${p.row})"
     width:32px;
     height:32px;
     border-radius:50%;
@@ -1205,6 +1206,12 @@ await carica();
 
   editModal.style.display = "block";
 }
+const editOra = document.getElementById("editOra");
+const editNome = document.getElementById("editNome");
+const editTelefono = document.getElementById("editTelefono");
+const editPersone = document.getElementById("editPersone");
+const editNote = document.getElementById("editNote");
+  
   function chiudiModifica(){
   editModal.style.display = "none";
   editRow = null;
