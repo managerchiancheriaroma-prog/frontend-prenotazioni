@@ -968,7 +968,24 @@ function setFiltro(val){
 /* LISTA */
 function renderLista(){
   lista.innerHTML="";
+const tot = prenotazioni.length;
 
+const pranzo = prenotazioni.filter(p=>{
+  if(!p.ora) return false;
+  const h = Number(p.ora.split(":")[0]);
+  return h < 18;
+}).length;
+
+const cena = prenotazioni.filter(p=>{
+  if(!p.ora) return false;
+  const h = Number(p.ora.split(":")[0]);
+  return h >= 18;
+}).length;
+
+document.getElementById("countTutto").innerText = tot;
+document.getElementById("countPranzo").innerText = pranzo;
+document.getElementById("countCena").innerText = cena;
+  
  prenotazioni
   .filter(p => {
 
@@ -1013,23 +1030,6 @@ else if (stato === "PENDING") {
     }
 
     el.onclick = () => selectRow(p.row);
-const tot = prenotazioni.length;
-
-const pranzo = prenotazioni.filter(p=>{
-  if(!p.ora) return false;
-  const h = Number(p.ora.split(":")[0]);
-  return h < 18;
-}).length;
-
-const cena = prenotazioni.filter(p=>{
-  if(!p.ora) return false;
-  const h = Number(p.ora.split(":")[0]);
-  return h >= 18;
-}).length;
-
-document.getElementById("tabTuttoCount").innerText = tot;
-document.getElementById("tabPranzoCount").innerText = pranzo;
-document.getElementById("tabCenaCount").innerText = cena;
     
 el.innerHTML = `
   <div style="display:flex; justify-content:space-between; align-items:center;">
