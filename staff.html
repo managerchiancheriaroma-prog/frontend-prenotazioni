@@ -343,7 +343,20 @@ button {
 <option value="vairano">Vairano</option>
 </select>
 
-<input type="date" id="data" onchange="carica()">
+<div id="dateBtn" onclick="apriCalendario()" style="
+  padding:12px;
+  background:linear-gradient(135deg,#2196f3,#1976d2);
+  color:white;
+  border-radius:14px;
+  text-align:center;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 6px 15px rgba(33,150,243,0.25);
+">
+  📅 Seleziona data
+</div>
+
+<input type="hidden" id="data">
 
 
 <div style="display:flex; gap:10px;">
@@ -534,7 +547,61 @@ button {
   </button>
 
 </div>
+
+  <div id="calendarModal" style="
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:white;
+  border-top-left-radius:20px;
+  border-top-right-radius:20px;
+  padding:20px;
+  display:none;
+  z-index:9999;
+">
+
+  <h3 style="text-align:center;">Seleziona data</h3>
+
+  <input type="date" id="realDate" style="
+    width:100%;
+    padding:12px;
+    font-size:18px;
+    border-radius:10px;
+    border:1px solid #ccc;
+  ">
+
+  <button onclick="confermaData()" style="
+    width:100%;
+    margin-top:10px;
+    background:#2196f3;
+    color:white;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    font-weight:700;
+  ">
+    Conferma
+  </button>
+
+  <button onclick="chiudiCalendario()" style="
+    width:100%;
+    margin-top:8px;
+    background:#999;
+    color:white;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+  ">
+    Chiudi
+  </button>
+
+</div>
 <script>
+  const calendarModal = document.getElementById("calendarModal");
+const dateBtn = document.getElementById("dateBtn");
+const realDate = document.getElementById("realDate");
+const data = document.getElementById("data");
 
 const API_URL = "/api/proxy";
 
@@ -1449,6 +1516,32 @@ const editNote = document.getElementById("editNote");
   });
 
   editRow = null;
+}
+  function apriCalendario(){
+  calendarModal.style.display = "block";
+}
+
+function chiudiCalendario(){
+  calendarModal.style.display = "none";
+}
+
+function confermaData(){
+  const val = realDate.value;
+  if(!val) return;
+
+  data.value = val;
+
+  const d = new Date(val);
+
+  dateBtn.innerText =
+    "📅 " + d.toLocaleDateString("it-IT", {
+      weekday:"short",
+      day:"numeric",
+      month:"short"
+    });
+
+  chiudiCalendario();
+  carica();
 }
 </script>
 
