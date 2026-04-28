@@ -597,11 +597,12 @@ const PASSWORDS = {
 
 let prenotazioni = [];
 let selezionata = null;
-  let editRow = null;
+let editRow = null;
 let snapshot = [];
 let auth = null;
 let filtroServizio = "tutti"; 
 let ignoreNextToast = false;
+let prenotazioniMese = [];
 const editModal = document.getElementById("editModal");
   
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
@@ -657,11 +658,11 @@ window.onload = () => {
 let pollingTimer = null;
 let isFetching = false;
 
-function start(){
-  carica();
+async function start(){
+  await carica();        // carica giorno
+  await caricaMese();    // 👈 AGGIUNGI QUI
+  renderCalendarPro();
 
-
-  // smart polling ogni 4 secondi
   pollingTimer = setInterval(smartPolling, 4000);
 }
 async function smartPolling(){
@@ -796,7 +797,26 @@ await carica();
   note.value = "";
     toggleForm();
 }
+async function caricaMese(){
 
+  const baseDate = new Date(data.value);
+  const year = baseDate.getFullYear();
+  const month = baseDate.getMonth() + 1;
+
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"getPrenotazioniMese", // 👈 DEVI AVERLA NEL BACKEND
+      ristorante: ristorante.value,
+      anno: year,
+      mese: month
+    })
+  });
+
+  const json = await res.json();
+  prenotazioniMese = json.data || [];
+}
  
   
 /* REFRESH */
@@ -1500,7 +1520,7 @@ function renderCalendarPro(){
   const grid = document.getElementById("calendarGrid");
   grid.innerHTML = "";
 
-  const giorni = groupByDate(prenotazioni);
+ const giorni = groupByDate(prenotazioniMese);
 
   // prendo mese corrente da data input
   const baseDate = data.value ? new Date(data.value) : new Date();
