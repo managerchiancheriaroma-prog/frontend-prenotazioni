@@ -758,7 +758,7 @@ if (nuovi.length > 0 && !ignoreNextToast) {
     prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
 
     render();
-
+renderCalendarPro();
   } catch (e) {
     console.log("polling error", e);
   }
@@ -1639,7 +1639,8 @@ function groupByDate(arr){
   const map = {};
 
   arr.forEach(p => {
-    if (!p.data) return; // sicurezza
+    if (!p.data) return;  // sicurezza
+p.data = p.data.split("T")[0]; 
 
     if (!map[p.data]) {
       map[p.data] = [];
@@ -1659,7 +1660,7 @@ function groupByDate(arr){
   const pranzo = list.filter(p => +p.ora.split(":")[0] < 18).length;
   const cena = tot - pranzo;
 
-  dayPreview.innerHTML = `
+  document.getElementById("dayPreview").innerHTML = `
     <b>📅 ${dateStr}</b><br><br>
     Totale: <b>${tot}</b><br>
     🍝 Pranzo: <b>${pranzo}</b><br>
