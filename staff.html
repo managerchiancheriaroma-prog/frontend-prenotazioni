@@ -288,7 +288,36 @@ button {
 <h2>Gestione Staff</h2>
 
 <div class="header">
+<div id="calendarPro" style="
+  margin-top:12px;
+  background:white;
+  border-radius:18px;
+  padding:12px;
+  box-shadow:0 6px 20px rgba(0,0,0,0.06);
+">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <b id="monthLabel">📅 Calendario</b>
+  </div>
 
+  <div id="calendarGrid" style="
+    display:grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap:6px;
+    margin-top:10px;
+  "></div>
+
+  <div id="dayPreview" style="
+    margin-top:12px;
+    padding:12px;
+    border-radius:12px;
+    background:#f5f5f5;
+    font-size:14px;
+  ">
+    Seleziona un giorno
+  </div>
+</div>
+
+  
 <div style="margin-bottom:10px;">
   <div style="font-size:16px; font-weight:700;">
     📅 <span id="dataLabel"></span>
@@ -1543,6 +1572,103 @@ function confermaData(){
   chiudiCalendario();
   carica();
 }
+let selectedDay = null;
+
+function renderCalendarPro(){
+
+  const grid = document.getElementById("calendarGrid");
+  grid.innerHTML = "";
+
+  const giorni = groupByDate(prenotazioni);
+
+  // prendo mese corrente da data input
+  const baseDate = data.value ? new Date(data.value) : new Date();
+  const year = baseDate.getFullYear();
+  const month = baseDate.getMonth();
+
+  const firstDay = new Date(year, month, 1);
+  const startDay = firstDay.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+
+  document.getElementById("monthLabel").innerText =
+    "📅 " + baseDate.toLocaleDateString("it-IT", { month:"long", year:"numeric" });
+
+  // empty slots prima del 1
+  for(let i=0;i<startDay;i++){
+    grid.appendChild(document.createElement("div"));
+  }
+
+  for(let d=1; d<=daysInMonth; d++){
+
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+
+    const list = giorni[dateStr] || [];
+
+    const tot = list.length;
+    const pranzo = list.filter(p => +p.ora.split(":")[0] < 18).length;
+    const cena = tot - pranzo;
+
+    const el = document.createElement("div");
+
+    let color = "#e0e0e0";
+    if(tot > 0) color = "#fff";
+    if(tot > 10) color = "#ffe082";
+    if(tot > 25) color = "#ffab91";
+
+    el.style = `
+      padding:8px;
+      border-radius:10px;
+      text-align:center;
+      cursor:pointer;
+      font-size:12px;
+      background:${color};
+      box-shadow:0 2px 6px rgba(0,0,0,0.05);
+    `;
+
+    el.innerHTML = `
+      <b>${d}</b>
+      <div style="font-size:10px; opacity:0.8">${tot}</div>
+    `;
+
+    el.onclick = () => selectDay(dateStr, list);
+
+    grid.appendChild(el);
+  }
+}
+function groupByDate(arr){
+  const map = {};
+
+  arr.forEach(p => {
+    if (!p.data) return; // sicurezza
+
+    if (!map[p.data]) {
+      map[p.data] = [];
+    }
+
+    map[p.data].push(p);
+  });
+
+  return map;
+}
+  function selectDay(dateStr, list){
+
+  selectedDay = dateStr;
+  data.value = dateStr;
+
+  const tot = list.length;
+  const pranzo = list.filter(p => +p.ora.split(":")[0] < 18).length;
+  const cena = tot - pranzo;
+
+  dayPreview.innerHTML = `
+    <b>📅 ${dateStr}</b><br><br>
+    Totale: <b>${tot}</b><br>
+    🍝 Pranzo: <b>${pranzo}</b><br>
+    🌙 Cena: <b>${cena}</b>
+  `;
+
+  carica();
+}
+  
 </script>
 
 </body>
