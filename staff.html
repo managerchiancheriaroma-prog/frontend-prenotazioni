@@ -182,9 +182,7 @@ button {
   min-width:70px;
   text-align:right;
 }
-.card {
-  background:white;
-}
+
 
 /* ARRIVATO → azzurro soft */
 .card.arrivato {
@@ -372,7 +370,7 @@ button {
 <option value="vairano">Vairano</option>
 </select>
 
-<div id="dateBtn" onclick="apriCalendario()" style="
+<div id="dateBtn" onclick="renderCalendarPro(); document.getElementById('calendarPro').scrollIntoView({behavior:'smooth'})" style="
   padding:12px;
   background:linear-gradient(135deg,#2196f3,#1976d2);
   color:white;
@@ -427,7 +425,7 @@ button {
 <div class="field">
 <label>Ora</label>
 
-<div id="oraBtn" onclick="apriSlot()" style="
+<div id="oraBtn" onclick="apriSlotGenerico(ora, oraBtn)" style="
   padding:12px;
   background:#eee;
   border-radius:8px;
@@ -473,7 +471,7 @@ button {
 <div class="field">
 <label>Ora</label>
 
-<div id="oraBtnWalk" onclick="apriSlotWalk()" style="
+<div id="oraBtnWalk" onclick="apriSlotGenerico(oraWalk, oraBtnWalk)" style="
   padding:12px;
   background:#eee;
   border-radius:8px;
@@ -577,56 +575,12 @@ button {
 
 </div>
 
-  <div id="calendarModal" style="
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:white;
-  border-top-left-radius:20px;
-  border-top-right-radius:20px;
-  padding:20px;
-  display:none;
-  z-index:9999;
-">
-
-  <h3 style="text-align:center;">Seleziona data</h3>
-
-  <input type="date" id="realDate" style="
-    width:100%;
-    padding:12px;
-    font-size:18px;
-    border-radius:10px;
-    border:1px solid #ccc;
-  ">
-
-  <button onclick="confermaData()" style="
-    width:100%;
-    margin-top:10px;
-    background:#2196f3;
-    color:white;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    font-weight:700;
-  ">
-    Conferma
-  </button>
-
-  <button onclick="chiudiCalendario()" style="
-    width:100%;
-    margin-top:8px;
-    background:#999;
-    color:white;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-  ">
-    Chiudi
-  </button>
-
-</div>
+  
 <script>
+const slotModal = document.getElementById("slotModal");
+const toast = document.getElementById("toast");
+const overlay = document.getElementById("overlay");
+  
   const calendarModal = document.getElementById("calendarModal");
 const dateBtn = document.getElementById("dateBtn");
 const realDate = document.getElementById("realDate");
@@ -704,6 +658,7 @@ let isFetching = false;
 
 function start(){
   carica();
+renderCalendarPro();
 
   // smart polling ogni 4 secondi
   pollingTimer = setInterval(smartPolling, 4000);
@@ -957,32 +912,7 @@ function generaSlot() {
 }
 /* ===== MODAL SLOT ===== */
 
-function apriSlot(){
-  const list = document.getElementById("slotList");
-  list.innerHTML = "";
-
-  const slots = generaSlot();
-
-  slots.forEach(s => {
-    const b = document.createElement("div");
-    b.innerText = s;
-
-    b.style = `
-      padding:10px 14px;
-      background:#f5f5f5;
-      border-radius:10px;
-      cursor:pointer;
-    `;
-
-    b.onclick = () => selezionaSlot(s);
-
-    list.appendChild(b);
-  });
-
-  slotModal.style.display = "block";
-}
-
-function apriSlotWalk(){
+function apriSlotGenerico(targetInput, targetBtn){
   const list = document.getElementById("slotList");
   list.innerHTML = "";
 
@@ -1000,8 +930,8 @@ function apriSlotWalk(){
     `;
 
     b.onclick = () => {
-      oraWalk.value = s;
-      oraBtnWalk.innerText = s;
+      targetInput.value = s;
+      targetBtn.innerText = s;
       chiudiSlot();
     };
 
@@ -1546,18 +1476,9 @@ const editNote = document.getElementById("editNote");
 
   editRow = null;
 }
-  function apriCalendario(){
-  calendarModal.style.display = "block";
-}
+  
 
-function chiudiCalendario(){
-  calendarModal.style.display = "none";
-}
-
-function confermaData(){
-  const val = realDate.value;
-  if(!val) return;
-
+function setData(val){
   data.value = val;
 
   const d = new Date(val);
@@ -1569,8 +1490,8 @@ function confermaData(){
       month:"short"
     });
 
-  chiudiCalendario();
   carica();
+}
 }
 let selectedDay = null;
 
@@ -1639,18 +1560,19 @@ function groupByDate(arr){
   const map = {};
 
   arr.forEach(p => {
-    if (!p.data) return;  // sicurezza
-p.data = p.data.split("T")[0]; 
+    if (!p.data) return;
 
-    if (!map[p.data]) {
-      map[p.data] = [];
+    const date = p.data.split("T")[0]; // ✔ NON modifica p
+
+    if (!map[date]) {
+      map[date] = [];
     }
 
-    map[p.data].push(p);
+    map[date].push(p);
   });
 
   return map;
-}
+}  
   function selectDay(dateStr, list){
 
   selectedDay = dateStr;
