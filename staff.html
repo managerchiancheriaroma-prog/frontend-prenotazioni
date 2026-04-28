@@ -289,6 +289,53 @@ button {
 
 <div class="header">
 
+<div style="margin-bottom:10px;">
+  <div style="font-size:16px; font-weight:700;">
+    📅 <span id="dataLabel"></span>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-top:10px;">
+
+    <div id="tabTutto" onclick="setFiltro('tutti')" style="
+      flex:1;
+      padding:10px;
+      border-radius:14px;
+      background:#333;
+      color:white;
+      text-align:center;
+      font-weight:700;
+      cursor:pointer;
+    ">
+      Tutto <span id="countTutto">0</span>
+    </div>
+
+    <div id="tabPranzo" onclick="setFiltro('pranzo')" style="
+      flex:1;
+      padding:10px;
+      border-radius:14px;
+      background:#eee;
+      text-align:center;
+      font-weight:700;
+      cursor:pointer;
+    ">
+      Pranzo <span id="countPranzo">0</span>
+    </div>
+
+    <div id="tabCena" onclick="setFiltro('cena')" style="
+      flex:1;
+      padding:10px;
+      border-radius:14px;
+      background:#eee;
+      text-align:center;
+      font-weight:700;
+      cursor:pointer;
+    ">
+      Cena <span id="countCena">0</span>
+    </div>
+
+  </div>
+</div>
+  
 <div class="left">
 <select id="ristorante">
 <option value="roma">Roma</option>
@@ -298,12 +345,7 @@ button {
 
 <input type="date" id="data" onchange="carica()">
 
-<select id="servizio" onchange="render()">
-<option value="tutti">Tutti</option>
-<option value="pranzo">Pranzo</option>
-<option value="cena">Cena</option>
-</select>
-</div>
+
 <div style="display:flex; gap:10px;">
 
  <button onclick="toggleForm()" style="
@@ -507,6 +549,7 @@ let selezionata = null;
   let editRow = null;
 let snapshot = [];
 let auth = null;
+let filtroServizio = "tutti"; 
 let ignoreNextToast = false;
 const editModal = document.getElementById("editModal");
   
@@ -890,11 +933,63 @@ function render(){
   renderTavoli();
 }
 
+function setFiltro(val){
+
+  filtroServizio = val;
+
+  // reset stile
+  document.getElementById("tabTutto").style.background = "#eee";
+  document.getElementById("tabPranzo").style.background = "#eee";
+  document.getElementById("tabCena").style.background = "#eee";
+
+  document.getElementById("tabTutto").style.color = "#000";
+  document.getElementById("tabPranzo").style.color = "#000";
+  document.getElementById("tabCena").style.color = "#000";
+
+  // attivo
+  if(val === "tutti"){
+    tabTutto.style.background = "#333";
+    tabTutto.style.color = "#fff";
+  }
+
+  if(val === "pranzo"){
+    tabPranzo.style.background = "#4caf50";
+    tabPranzo.style.color = "#fff";
+  }
+
+  if(val === "cena"){
+    tabCena.style.background = "#2196f3";
+    tabCena.style.color = "#fff";
+  }
+
+  render();
+}
+  
 /* LISTA */
 function renderLista(){
   lista.innerHTML="";
 
-  prenotazioni.forEach(p=>{
+ prenotazioni
+  .filter(p => {
+
+    if(filtroServizio === "tutti") return true;
+
+    const ora = p.ora;
+    if(!ora) return false;
+
+    const [h] = ora.split(":").map(Number);
+
+    if(filtroServizio === "pranzo"){
+      return h < 18;
+    }
+
+    if(filtroServizio === "cena"){
+      return h >= 18;
+    }
+
+    return true;
+  })
+  .forEach(p=>{
     const el=document.createElement("div");
     el.className = "card";
 
@@ -918,7 +1013,24 @@ else if (stato === "PENDING") {
     }
 
     el.onclick = () => selectRow(p.row);
+const tot = prenotazioni.length;
 
+const pranzo = prenotazioni.filter(p=>{
+  if(!p.ora) return false;
+  const h = Number(p.ora.split(":")[0]);
+  return h < 18;
+}).length;
+
+const cena = prenotazioni.filter(p=>{
+  if(!p.ora) return false;
+  const h = Number(p.ora.split(":")[0]);
+  return h >= 18;
+}).length;
+
+document.getElementById("tabTuttoCount").innerText = tot;
+document.getElementById("tabPranzoCount").innerText = pranzo;
+document.getElementById("tabCenaCount").innerText = cena;
+    
 el.innerHTML = `
   <div style="display:flex; justify-content:space-between; align-items:center;">
 
