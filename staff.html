@@ -287,6 +287,7 @@ button {
 
 <div class="header">
 <div id="calendarPro" style="
+  display:none;
   margin-top:12px;
   background:white;
   border-radius:18px;
@@ -370,7 +371,7 @@ button {
 <option value="vairano">Vairano</option>
 </select>
 
-<div id="dateBtn" onclick="renderCalendarPro(); document.getElementById('calendarPro').scrollIntoView({behavior:'smooth'})" style="
+<div id="dateBtn" onclick="toggleCalendar()" style="
   padding:12px;
   background:linear-gradient(135deg,#2196f3,#1976d2);
   color:white;
@@ -658,7 +659,7 @@ let isFetching = false;
 
 function start(){
   carica();
-renderCalendarPro();
+
 
   // smart polling ogni 4 secondi
   pollingTimer = setInterval(smartPolling, 4000);
@@ -689,7 +690,7 @@ async function smartPolling(){
     const prevRows = new Set(prenotazioni.map(p => p.row));
     const nuovi = nuove.filter(p => !prevRows.has(p.row));
 
-if (nuovi.length > 0 && !ignoreNextToast) {
+if (nuovi.length > 0 && !ignoreNextToast && prenotazioni.length > 0) {
   const p = nuovi[0];
   showToast(`Nuova prenotazione\n${p.nome} (${p.persone} persone)`);
 }
@@ -713,7 +714,7 @@ if (nuovi.length > 0 && !ignoreNextToast) {
     prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
 
     render();
-renderCalendarPro();
+
   } catch (e) {
     console.log("polling error", e);
   }
@@ -1590,7 +1591,20 @@ function groupByDate(arr){
 
   carica();
 }
-  
+  function toggleCalendar(){
+  const cal = document.getElementById("calendarPro");
+
+  if(cal.style.display === "none"){
+    cal.style.display = "block";
+    renderCalendarPro();
+
+    setTimeout(()=>{
+      cal.scrollIntoView({behavior:"smooth"});
+    },100);
+  } else {
+    cal.style.display = "none";
+  }
+}
 </script>
 
 </body>
