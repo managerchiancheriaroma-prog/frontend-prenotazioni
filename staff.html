@@ -1543,11 +1543,30 @@ function renderCalendarPro(){
 
     const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 
-    const list = giorni[dateStr] || [];
+const list = giorni[dateStr] || [];
 
-    const tot = list.length;
-    const pranzo = list.filter(p => +p.ora.split(":")[0] < 18).length;
-    const cena = tot - pranzo;
+// 🔥 conteggio corretto
+let totPrenotazioni = list.length;
+let totPersone = 0;
+let pranzo = 0;
+let cena = 0;
+
+list.forEach(p => {
+
+  const persone = Number(p.persone) || 0;
+  totPersone += persone;
+
+  if (!p.ora) return;
+
+  const h = Number(p.ora.split(":")[0]);
+
+  if (h < 18) {
+    pranzo += persone;
+  } else {
+    cena += persone;
+  }
+
+});
 
     const el = document.createElement("div");
 
@@ -1566,10 +1585,12 @@ function renderCalendarPro(){
       box-shadow:0 2px 6px rgba(0,0,0,0.05);
     `;
 
-    el.innerHTML = `
-      <b>${d}</b>
-      <div style="font-size:10px; opacity:0.8">${tot}</div>
-    `;
+   el.innerHTML = `
+  <b>${d}</b>
+  <div style="font-size:10px; opacity:0.8">
+    ${totPrenotazioni} | 👥 ${totPersone}
+  </div>
+`;
 
     el.onclick = () => selectDay(dateStr, list);
 
@@ -1598,16 +1619,32 @@ function groupByDate(arr){
   selectedDay = dateStr;
   data.value = dateStr;
 
-  const tot = list.length;
-  const pranzo = list.filter(p => +p.ora.split(":")[0] < 18).length;
-  const cena = tot - pranzo;
+  let totPrenotazioni = list.length;
+let totPersone = 0;
+let pranzo = 0;
+let cena = 0;
+
+list.forEach(p => {
+  const persone = Number(p.persone) || 0;
+  totPersone += persone;
+
+  if (!p.ora) return;
+
+  const h = Number(p.ora.split(":")[0]);
+
+  if (h < 18) {
+    pranzo += persone;
+  } else {
+    cena += persone;
+  }
+});
 
   document.getElementById("dayPreview").innerHTML = `
     <b>📅 ${dateStr}</b><br><br>
-    Totale: <b>${tot}</b><br>
-    🍝 Pranzo: <b>${pranzo}</b><br>
-    🌙 Cena: <b>${cena}</b>
-  `;
+  Prenotazioni: <b>${totPrenotazioni}</b><br>
+👥 Coperti: <b>${totPersone}</b><br>
+🍝 Pranzo: <b>${pranzo}</b><br>
+🌙 Cena: <b>${cena}</b>
 
   carica();
 }
