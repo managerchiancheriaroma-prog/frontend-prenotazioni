@@ -1573,9 +1573,9 @@ list.forEach(p => {
     const el = document.createElement("div");
 
     let color = "#e0e0e0";
-    if(tot > 0) color = "#fff";
-    if(tot > 10) color = "#ffe082";
-    if(tot > 25) color = "#ffab91";
+if(totPrenotazioni > 0) color = "#fff";
+if(totPrenotazioni > 10) color = "#ffe082";
+if(totPrenotazioni > 25) color = "#ffab91";
 
     el.style = `
       padding:8px;
@@ -1605,7 +1605,7 @@ function groupByDate(arr){
   arr.forEach(p => {
     if (!p.data) return;
 
-    const date = p.data.split("T")[0]; // ✔ NON modifica p
+    const date = new Date(p.data).toISOString().split("T")[0]; // ✔ NON modifica p
 
     if (!map[date]) {
       map[date] = [];
@@ -1653,7 +1653,7 @@ list.forEach(p => {
   function toggleCalendar(){
   const cal = document.getElementById("calendarPro");
 
-  if(cal.style.display === "none"){
+  if(!cal.style.display || cal.style.display === "none"){
     cal.style.display = "block";
     renderCalendarPro();
 
