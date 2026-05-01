@@ -604,6 +604,7 @@ let filtroServizio = "tutti";
 let ignoreNextToast = false;
 let prenotazioniMese = [];
 const editModal = document.getElementById("editModal");
+  let isRefreshing = false;
   
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
@@ -646,6 +647,7 @@ function login() {
 
 window.onload = () => {
   const saved = sessionStorage.getItem("staff_auth");
+
   if (saved) {
     auth = saved;
     loginScreen.style.display = "none";
@@ -653,6 +655,22 @@ window.onload = () => {
     data.value = new Date().toISOString().split("T")[0];
     start();
   }
+
+  setInterval(async () => {
+
+    if (isRefreshing) return;
+
+    isRefreshing = true;
+
+    try {
+      await refreshCalendario();
+    } catch (e) {
+      console.error("refresh error", e);
+    } finally {
+      isRefreshing = false;
+    }
+
+  }, 5000);
 };
 
 let pollingTimer = null;
@@ -820,7 +838,10 @@ console.log("MESE RAW:", json);
 prenotazioniMese = json.data || [];
 }
  
-  
+ async function refreshCalendario(){
+  await caricaMese();       // ricarica dati dal backend
+  renderCalendarPro();      // ridisegna calendario
+} 
 /* REFRESH */
 async function refreshSilenzioso() {
   const res = await fetch(API_URL,{
@@ -1518,6 +1539,8 @@ function setData(val){
 let selectedDay = null;
 
 function renderCalendarPro(){
+  if (!prenotazioniMese) return;
+if (isRefreshing) return;
 
   const grid = document.getElementById("calendarGrid");
   grid.innerHTML = "";
