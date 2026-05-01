@@ -814,8 +814,10 @@ async function caricaMese(){
     })
   });
 
-  const json = await res.json();
-  prenotazioniMese = json.data || [];
+const json = await res.json();
+console.log("MESE RAW:", json);
+
+prenotazioniMese = json.data || [];
 }
  
   
