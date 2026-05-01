@@ -839,9 +839,19 @@ prenotazioniMese = json.data || [];
 }
  
  async function refreshCalendario(){
-  await caricaMese();       // ricarica dati dal backend
-  renderCalendarPro();      // ridisegna calendario
-} 
+
+  isRefreshing = true;
+
+  try {
+    await caricaMese();        // 👈 DEVE aggiornare prenotazioniMese
+    renderCalendarPro();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    isRefreshing = false;
+  }
+
+}
 /* REFRESH */
 async function refreshSilenzioso() {
   const res = await fetch(API_URL,{
