@@ -1679,6 +1679,27 @@ function groupByDate(arr){
   `;
 
   await carica();   // 🔥 FIX
+   await caricaForDate(dateStr);
+}
+  async function caricaForDate(dateStr){
+
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"getPrenotazioniGiorno",
+      ristorante: ristorante.value,
+      data: dateStr
+    })
+  });
+
+  const json = await res.json();
+
+  prenotazioni = json.data || [];
+
+  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
+
+  render();
 }
   function toggleCalendar(){
   const cal = document.getElementById("calendarPro");
