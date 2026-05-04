@@ -657,32 +657,11 @@ window.onload = () => {
   }
 
   setInterval(async () => {
-
-    if (isRefreshing) return;
-
-    isRefreshing = true;
-
-    try {
-      await refreshCalendario();
-    } catch (e) {
-      console.error("refresh error", e);
-    } finally {
-      isRefreshing = false;
-    }
-
+    await carica();        // giorno
+    await caricaMese();    // mese
+    renderCalendarPro();   // aggiorna UI
   }, 5000);
 };
-
-let pollingTimer = null;
-let isFetching = false;
-
-async function start(){
-  await carica();        // carica giorno
-  await caricaMese();    // 👈 AGGIUNGI QUI
-  renderCalendarPro();
-
-  pollingTimer = setInterval(smartPolling, 4000);
-}
 async function smartPolling(){
 
   if (isFetching) return;
@@ -763,6 +742,7 @@ async function carica() {
   prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
 
   render();
+  await caricaMese(); // 🔥 AGGIUNTO
 }
   async function aggiungi(){
   const oraVal = ora.value;
@@ -1649,39 +1629,37 @@ function groupByDate(arr){
 
   return map;
 }  
-  function selectDay(dateStr, list){
+ async function selectDay(dateStr, list){
 
   selectedDay = dateStr;
   data.value = dateStr;
 
   let totPrenotazioni = list.length;
-let totPersone = 0;
-let pranzo = 0;
-let cena = 0;
+  let totPersone = 0;
+  let pranzo = 0;
+  let cena = 0;
 
-list.forEach(p => {
-  const persone = Number(p.persone) || 0;
-  totPersone += persone;
+  list.forEach(p => {
+    const persone = Number(p.persone) || 0;
+    totPersone += persone;
 
-  if (!p.ora) return;
+    if (!p.ora) return;
 
-  const h = Number(p.ora.split(":")[0]);
+    const h = Number(p.ora.split(":")[0]);
 
-  if (h < 18) {
-    pranzo += persone;
-  } else {
-    cena += persone;
-  }
-});
+    if (h < 18) pranzo += persone;
+    else cena += persone;
+  });
 
   document.getElementById("dayPreview").innerHTML = `
     <b>📅 ${dateStr}</b><br><br>
-  Prenotazioni: <b>${totPrenotazioni}</b><br>
-👥 Coperti: <b>${totPersone}</b><br>
-🍝 Pranzo: <b>${pranzo}</b><br>
-🌙 Cena: <b>${cena}</b>
-`;
-  carica();
+    Prenotazioni: <b>${totPrenotazioni}</b><br>
+    👥 Coperti: <b>${totPersone}</b><br>
+    🍝 Pranzo: <b>${pranzo}</b><br>
+    🌙 Cena: <b>${cena}</b>
+  `;
+
+  await carica();   // 🔥 FIX
 }
   function toggleCalendar(){
   const cal = document.getElementById("calendarPro");
