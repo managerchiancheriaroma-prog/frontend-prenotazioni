@@ -653,27 +653,27 @@ window.onload = () => {
     loginScreen.style.display = "none";
     ristorante.value = saved;
     data.value = new Date().toISOString().split("T")[0];
-    start();
+
+    carica();
+    caricaMese();
   }
 
-setInterval(async () => {
+  setInterval(async () => {
+    if (isRefreshing) return;
 
-  if (isRefreshing) return;
+    isRefreshing = true;
 
-  isRefreshing = true;
-
-  try {
-    await caricaMese();
-    renderCalendarPro();
-  } catch(e){
-    console.error(e);
-  } finally {
-    isRefreshing = false;
-  }
-
-}, 5000);
+    try {
+      await caricaMese();
+      renderCalendarPro();
+    } catch(e){
+      console.error(e);
+    } finally {
+      isRefreshing = false;
+    }
+  }, 5000);
 };
-async function smartPolling(){
+  async function smartPolling(){
 
   if (isFetching) return;
   isFetching = true;
@@ -1547,7 +1547,7 @@ function setData(val){
 let selectedDay = null;
 
 function renderCalendarPro(){
-  if (!prenotazioniMese) return;
+  if (!Array.isArray(prenotazioniMese)) return;
 if (isRefreshing) return;
 
   const grid = document.getElementById("calendarGrid");
@@ -1636,7 +1636,7 @@ function groupByDate(arr){
   arr.forEach(p => {
     if (!p.data) return;
 
-   const date = p.data.split("T")[0];
+   const date = (p.data || "").slice(0,10);
 
     if (!map[date]) {
       map[date] = [];
