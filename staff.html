@@ -656,11 +656,22 @@ window.onload = () => {
     start();
   }
 
-  setInterval(async () => {
-    await carica();        // giorno
-    await caricaMese();    // mese
-    renderCalendarPro();   // aggiorna UI
-  }, 5000);
+setInterval(async () => {
+
+  if (isRefreshing) return;
+
+  isRefreshing = true;
+
+  try {
+    await caricaMese();
+    renderCalendarPro();
+  } catch(e){
+    console.error(e);
+  } finally {
+    isRefreshing = false;
+  }
+
+}, 5000);
 };
 async function smartPolling(){
 
@@ -742,7 +753,7 @@ async function carica() {
   prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
 
   render();
-  await caricaMese(); // 🔥 AGGIUNTO
+ 
 }
   async function aggiungi(){
   const oraVal = ora.value;
@@ -786,7 +797,10 @@ const nuova = {
   }
 
 ignoreNextToast = true;
-await carica();
+
+await carica();        // aggiorna giorno
+await caricaMese();    // aggiorna mese
+renderCalendarPro();   // 🔥 aggiorna calendario SUBITO
 
   ora.value = "";
   nome.value = "";
@@ -1439,8 +1453,11 @@ function toggleWalkin(){
     return;
   }
 
-  ignoreNextToast = true;
-await carica();
+ ignoreNextToast = true;
+
+await carica();        // aggiorna giorno
+await caricaMese();    // aggiorna mese
+renderCalendarPro();   // 🔥 aggiorna calendario SUBITO
 
   // reset campi
   oraWalk.value = "";
@@ -1618,7 +1635,7 @@ function groupByDate(arr){
   arr.forEach(p => {
     if (!p.data) return;
 
-    const date = new Date(p.data).toISOString().split("T")[0]; // ✔ NON modifica p
+   const date = p.data.split("T")[0];
 
     if (!map[date]) {
       map[date] = [];
