@@ -674,6 +674,10 @@ window.onload = () => {
     }
   }, 5000);
 };
+ function renderCalendarPro(){
+  if (isRefreshing) return;
+  if (!Array.isArray(prenotazioniMese)) return;
+  
   async function smartPolling(){
 
   if (isFetching) return;
@@ -1637,7 +1641,7 @@ function groupByDate(arr){
   arr.forEach(p => {
     if (!p.data) return;
 
-   const date = (p.data || "").slice(0,10);
+   const date = new Date(p.data).toISOString().slice(0,10);
 
     if (!map[date]) {
       map[date] = [];
@@ -1677,11 +1681,8 @@ async function selectDay(dateStr, list){
     🍝 Pranzo: <b>${pranzo}</b><br>
     🌙 Cena: <b>${cena}</b>
   `;
-
-  await carica();
-
-  // 🔥 FIX AGGIUNTIVO FONDAMENTALE
-  render();   // <<< QUESTO TI MANCA
+prenotazioni = list;   // usa i dati già passati dal calendario
+render();
 }
   function toggleCalendar(){
   const cal = document.getElementById("calendarPro");
