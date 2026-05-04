@@ -1648,7 +1648,7 @@ function groupByDate(arr){
 
   return map;
 }  
- async function selectDay(dateStr, list){
+async function selectDay(dateStr, list){
 
   selectedDay = dateStr;
   data.value = dateStr;
@@ -1678,28 +1678,10 @@ function groupByDate(arr){
     🌙 Cena: <b>${cena}</b>
   `;
 
-  await carica();   // 🔥 FIX
-   await caricaForDate(dateStr);
-}
-  async function caricaForDate(dateStr){
+  await carica();
 
-  const res = await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"getPrenotazioniGiorno",
-      ristorante: ristorante.value,
-      data: dateStr
-    })
-  });
-
-  const json = await res.json();
-
-  prenotazioni = json.data || [];
-
-  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
-
-  render();
+  // 🔥 FIX AGGIUNTIVO FONDAMENTALE
+  render();   // <<< QUESTO TI MANCA
 }
   function toggleCalendar(){
   const cal = document.getElementById("calendarPro");
