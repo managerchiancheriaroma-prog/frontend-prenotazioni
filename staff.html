@@ -639,7 +639,8 @@ function login() {
     ristorante.value = r;
     data.value = new Date().toISOString().split("T")[0];
 
-    start();
+    carica();
+caricaMese();
   } else {
     loginError.innerText = "Password errata";
   }
