@@ -1673,7 +1673,7 @@ function groupByDate(arr){
   arr.forEach(p => {
     if (!p.data) return;
 
-   const date = new Date(p.data).toISOString().slice(0,10);
+   const date = p.data.slice(0,10);
 
     if (!map[date]) {
       map[date] = [];
@@ -1688,6 +1688,8 @@ async function selectDay(dateStr, list){
 
   selectedDay = dateStr;
   data.value = dateStr;
+
+  await carica();
 
   let totPrenotazioni = list.length;
   let totPersone = 0;
@@ -1713,8 +1715,6 @@ async function selectDay(dateStr, list){
     🍝 Pranzo: <b>${pranzo}</b><br>
     🌙 Cena: <b>${cena}</b>
   `;
-prenotazioni = list;   // usa i dati già passati dal calendario
-render();
 }
   function toggleCalendar(){
   const cal = document.getElementById("calendarPro");
