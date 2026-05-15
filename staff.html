@@ -591,6 +591,7 @@ style="
 const slotModal = document.getElementById("slotModal");
 const toast = document.getElementById("toast");
 const overlay = document.getElementById("overlay");
+const ristorante = document.getElementById("ristorante");
   
   const calendarModal = document.getElementById("calendarModal");
 const dateBtn = document.getElementById("dateBtn");
@@ -615,6 +616,7 @@ let ignoreNextToast = false;
 let prenotazioniMese = [];
 const editModal = document.getElementById("editModal");
   let isRefreshing = false;
+  let isFetching = false;
   
 const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
 const tavoliEsterna = [21,22,23,24,25,26,41,42];
@@ -698,70 +700,10 @@ window.onload = () => {
       isRefreshing = false;
     }
   }, 5000);
+  setInterval(smartPolling, 4000);
 };
- function renderCalendarPro(){
-  if (isRefreshing) return;
-  if (!Array.isArray(prenotazioniMese)) return;
   
-  async function smartPolling(){
 
-  if (isFetching) return;
-  isFetching = true;
-
-  try {
-    const res = await fetch(API_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({
-        action:"getPrenotazioniGiorno",
-        ristorante:ristorante.value,
-        data:data.value
-      })
-    });
-
-    const json = await res.json();
-    console.log("RAW SERVER:", json.data);
-    const nuove = json.data || [];
-
-    if (!Array.isArray(nuove)) return;
-
-    // 🔔 nuove prenotazioni (sicuro)
-    const prevRows = new Set(prenotazioni.map(p => p.row));
-    const nuovi = nuove.filter(p => !prevRows.has(p.row));
-
-if (nuovi.length > 0 && !ignoreNextToast && prenotazioni.length > 0) {
-  const p = nuovi[0];
-  showToast(`Nuova prenotazione\n${p.nome} (${p.persone} persone)`);
-}
-
-    // ✅ confronto leggero (solo lunghezza + row)
-    const changed =
-      nuove.length !== prenotazioni.length ||
-      nuove.some(n => {
-        const old = prenotazioni.find(p => p.row === n.row);
-        return !old || old.stato !== n.stato || old.tavolo !== n.tavolo;
-      });
-
-    if (!changed) {
-     ignoreNextToast = false;
-      isFetching = false;
-      return;
-    }
-
-    // 🔄 aggiorna solo se serve
-    prenotazioni = nuove;
-    prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
-
-    render();
-
-  } catch (e) {
-    console.log("polling error", e);
-  }
-
-  isFetching = false;
-}
-}
- 
 /* CARICA */
 async function carica() {
   const res = await fetch(API_URL,{
@@ -791,6 +733,16 @@ async function carica() {
   const nomeVal = nome.value;
   const telefonoVal = telefono.value;
   const personeVal = persone.value;
+  const ora = document.getElementById("ora");
+const nome = document.getElementById("nome");
+const telefono = document.getElementById("telefono");
+const persone = document.getElementById("persone");
+const note = document.getElementById("note");
+
+const oraWalk = document.getElementById("oraWalk");
+const personeWalk = document.getElementById("personeWalk");
+const tavoloWalk = document.getElementById("tavoloWalk");
+const oraBtnWalk = document.getElementById("oraBtnWalk");
 
   if (!oraVal || !nomeVal || !personeVal) {
     alert("Compila i campi obbligatori");
@@ -876,6 +828,60 @@ prenotazioniMese = json.data || [];
     isRefreshing = false;
   }
 
+}
+
+  async function smartPolling(){
+
+  if (isFetching) return;
+  isFetching = true;
+
+  try {
+
+    const res = await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action:"getPrenotazioniGiorno",
+        ristorante:ristorante.value,
+        data:data.value
+      })
+    });
+
+    const json = await res.json();
+    const nuove = json.data || [];
+
+    if (!Array.isArray(nuove)) return;
+
+    const prevRows = new Set(prenotazioni.map(p => p.row));
+    const nuovi = nuove.filter(p => !prevRows.has(p.row));
+
+    if (nuovi.length > 0 && !ignoreNextToast && prenotazioni.length > 0) {
+      const p = nuovi[0];
+      showToast(`Nuova prenotazione\n${p.nome} (${p.persone} persone)`);
+    }
+
+    const changed =
+      nuove.length !== prenotazioni.length ||
+      nuove.some(n => {
+        const old = prenotazioni.find(p => p.row === n.row);
+        return !old || old.stato !== n.stato || old.tavolo !== n.tavolo;
+      });
+
+    if (!changed) {
+      ignoreNextToast = false;
+      return;
+    }
+
+    prenotazioni = nuove;
+    prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
+
+    render();
+
+  } catch(e){
+    console.log("polling error", e);
+  } finally {
+    isFetching = false;
+  }
 }
 /* REFRESH */
 async function refreshSilenzioso() {
