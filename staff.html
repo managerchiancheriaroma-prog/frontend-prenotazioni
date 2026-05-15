@@ -426,7 +426,12 @@ button {
 <div class="field">
 <label>Ora</label>
 
-<div id="oraBtn" onclick="apriSlotGenerico(ora, oraBtn)" style="
+<div id="oraBtn"
+onclick="apriSlotGenerico(
+document.getElementById('ora'),
+document.getElementById('oraBtn')
+)"
+style="
   padding:12px;
   background:#eee;
   border-radius:8px;
@@ -472,7 +477,12 @@ button {
 <div class="field">
 <label>Ora</label>
 
-<div id="oraBtnWalk" onclick="apriSlotGenerico(oraWalk, oraBtnWalk)" style="
+<div id="oraBtnWalk"
+onclick="apriSlotGenerico(
+document.getElementById('oraWalk'),
+document.getElementById('oraBtnWalk')
+)"
+style="
   padding:12px;
   background:#eee;
   border-radius:8px;
