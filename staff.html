@@ -627,26 +627,39 @@ const tavoliEsterna = [21,22,23,24,25,26,41,42];
   }
 };
 /* LOGIN */
-function login() {
-const loginRistorante = document.getElementById("loginRistorante");
-const password = document.getElementById("password");
-const loginError = document.getElementById("loginError");
+  function login() {
+
+  const loginRistorante = document.getElementById("loginRistorante");
+  const password = document.getElementById("password");
+  const loginError = document.getElementById("loginError");
+  const loginScreen = document.getElementById("loginScreen");
+
+  const r = loginRistorante.value;
+  const pw = password.value;
 
   if (PASSWORDS[r] === pw) {
+
     auth = r;
+
     sessionStorage.setItem("staff_auth", r);
+
     loginScreen.style.display = "none";
 
     ristorante.value = r;
+
     data.value = new Date().toISOString().split("T")[0];
 
     carica();
-caricaMese();
+    caricaMese();
+
   } else {
+
     loginError.innerText = "Password errata";
+
   }
 }
-  window.login = login;
+
+window.login = login;
 
 window.onload = () => {
   const saved = sessionStorage.getItem("staff_auth");
