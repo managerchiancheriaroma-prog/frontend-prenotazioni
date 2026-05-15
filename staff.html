@@ -628,8 +628,9 @@ const tavoliEsterna = [21,22,23,24,25,26,41,42];
 };
 /* LOGIN */
 function login() {
-  const r = loginRistorante.value;
-  const pw = password.value;
+const loginRistorante = document.getElementById("loginRistorante");
+const password = document.getElementById("password");
+const loginError = document.getElementById("loginError");
 
   if (PASSWORDS[r] === pw) {
     auth = r;
@@ -644,7 +645,8 @@ caricaMese();
   } else {
     loginError.innerText = "Password errata";
   }
-};
+}
+  window.login = login;
 
 window.onload = () => {
   const saved = sessionStorage.getItem("staff_auth");
