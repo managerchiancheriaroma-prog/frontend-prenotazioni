@@ -592,6 +592,10 @@ const slotModal = document.getElementById("slotModal");
 const toast = document.getElementById("toast");
 const overlay = document.getElementById("overlay");
 const ristorante = document.getElementById("ristorante");
+
+  const lista = document.getElementById("lista");
+const interna = document.getElementById("interna");
+const esterna = document.getElementById("esterna");
   
   const calendarModal = document.getElementById("calendarModal");
 const dateBtn = document.getElementById("dateBtn");
@@ -613,6 +617,7 @@ let snapshot = [];
 let auth = null;
 let filtroServizio = "tutti"; 
 let ignoreNextToast = false;
+let currentDateLoaded = "";
 let prenotazioniMese = [];
 const editModal = document.getElementById("editModal");
   let isRefreshing = false;
@@ -724,7 +729,7 @@ async function carica() {
   `${p.row}-${p.stato}-${p.tavolo}`
 );
   prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
-
+currentDateLoaded = data.value;
   render();
  
 }
@@ -830,9 +835,15 @@ prenotazioniMese = json.data || [];
 
 }
 
-  async function smartPolling(){
-
+async function smartPolling(){
+  if (currentDateLoaded !== data.value) return;
   if (isFetching) return;
+
+  // NON pollare mentre guardi un'altra data
+  if (selectedDay && selectedDay !== new Date().toISOString().slice(0,10)) {
+    return;
+  }
+
   isFetching = true;
 
   try {
@@ -847,10 +858,12 @@ prenotazioniMese = json.data || [];
       })
     });
 
-    const json = await res.json();
-    const nuove = json.data || [];
+const raw = Array.isArray(json.data) ? json.data : [];
 
-    if (!Array.isArray(nuove)) return;
+const nuove = raw.map(p => ({
+  ...p,
+  note: p.note || p.notes || p.Note || ""
+}));
 
     const prevRows = new Set(prenotazioni.map(p => p.row));
     const nuovi = nuove.filter(p => !prevRows.has(p.row));
@@ -1045,7 +1058,9 @@ function render(){
 }
 
 function setFiltro(val){
-
+const tabTutto = document.getElementById("tabTutto");
+const tabPranzo = document.getElementById("tabPranzo");
+const tabCena = document.getElementById("tabCena");
   filtroServizio = val;
 
   // reset stile
@@ -1585,7 +1600,7 @@ let selectedDay = null;
 
 function renderCalendarPro(){
   if (!Array.isArray(prenotazioniMese)) return;
-if (isRefreshing) return;
+
 
   const grid = document.getElementById("calendarGrid");
   grid.innerHTML = "";
@@ -1723,9 +1738,12 @@ async function selectDay(dateStr, list){
     cal.style.display = "block";
     renderCalendarPro();
 
-    setTimeout(()=>{
-      cal.scrollIntoView({behavior:"smooth"});
-    },100);
+requestAnimationFrame(() => {
+  cal.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+});
   } else {
     cal.style.display = "none";
   }
