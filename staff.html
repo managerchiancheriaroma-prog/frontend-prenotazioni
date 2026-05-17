@@ -733,37 +733,36 @@ currentDateLoaded = data.value;
   render();
  
 }
-  async function aggiungi(){
+async function aggiungi(){
+
+  const ora = document.getElementById("ora");
+  const nome = document.getElementById("nome");
+  const telefono = document.getElementById("telefono");
+  const persone = document.getElementById("persone");
+  const note = document.getElementById("note");
+
   const oraVal = ora.value;
   const nomeVal = nome.value;
   const telefonoVal = telefono.value;
   const personeVal = persone.value;
-  const ora = document.getElementById("ora");
-const nome = document.getElementById("nome");
-const telefono = document.getElementById("telefono");
-const persone = document.getElementById("persone");
-const note = document.getElementById("note");
-
-const oraWalk = document.getElementById("oraWalk");
-const personeWalk = document.getElementById("personeWalk");
-const tavoloWalk = document.getElementById("tavoloWalk");
-const oraBtnWalk = document.getElementById("oraBtnWalk");
 
   if (!oraVal || !nomeVal || !personeVal) {
     alert("Compila i campi obbligatori");
     return;
   }
-if (!orarioValido(ristorante.value, data.value, oraVal)) {
-  alert("Orario non disponibile per le prenotazioni");
-  return;
-}
-const nuova = {
-  ora: oraVal,
-  nome: nomeVal,
-  telefono: telefonoVal,
-  persone: personeVal,
-  note: note.value || ""
-};
+
+  if (!orarioValido(ristorante.value, data.value, oraVal)) {
+    alert("Orario non disponibile per le prenotazioni");
+    return;
+  }
+
+  const nuova = {
+    ora: oraVal,
+    nome: nomeVal,
+    telefono: telefonoVal,
+    persone: personeVal,
+    note: note.value || ""
+  };
 
   const res = await fetch(API_URL,{
     method:"POST",
