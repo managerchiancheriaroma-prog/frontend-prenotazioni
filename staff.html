@@ -836,11 +836,15 @@ prenotazioniMese = json.data || [];
 }
 
 async function smartPolling(){
+
   if (currentDateLoaded !== data.value) return;
   if (isFetching) return;
 
   // NON pollare mentre guardi un'altra data
-  if (selectedDay && selectedDay !== new Date().toISOString().slice(0,10)) {
+  if (
+    selectedDay &&
+    selectedDay !== new Date().toISOString().slice(0,10)
+  ) {
     return;
   }
 
@@ -858,26 +862,45 @@ async function smartPolling(){
       })
     });
 
-const raw = Array.isArray(json.data) ? json.data : [];
+    const json = await res.json();
 
-const nuove = raw.map(p => ({
-  ...p,
-  note: p.note || p.notes || p.Note || ""
-}));
+    const nuove = (json.data || []).map(p => ({
+      ...p,
+      note: p.note || p.notes || p.Note || ""
+    }));
+
+    if (!Array.isArray(nuove)) return;
 
     const prevRows = new Set(prenotazioni.map(p => p.row));
-    const nuovi = nuove.filter(p => !prevRows.has(p.row));
 
-    if (nuovi.length > 0 && !ignoreNextToast && prenotazioni.length > 0) {
+    const nuovi = nuove.filter(
+      p => !prevRows.has(p.row)
+    );
+
+    if (
+      nuovi.length > 0 &&
+      !ignoreNextToast &&
+      prenotazioni.length > 0
+    ) {
       const p = nuovi[0];
-      showToast(`Nuova prenotazione\n${p.nome} (${p.persone} persone)`);
+
+      showToast(
+        `Nuova prenotazione\n${p.nome} (${p.persone} persone)`
+      );
     }
 
     const changed =
       nuove.length !== prenotazioni.length ||
       nuove.some(n => {
-        const old = prenotazioni.find(p => p.row === n.row);
-        return !old || old.stato !== n.stato || old.tavolo !== n.tavolo;
+        const old = prenotazioni.find(
+          p => p.row === n.row
+        );
+
+        return (
+          !old ||
+          old.stato !== n.stato ||
+          old.tavolo !== n.tavolo
+        );
       });
 
     if (!changed) {
@@ -886,17 +909,25 @@ const nuove = raw.map(p => ({
     }
 
     prenotazioni = nuove;
-    prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
+
+    prenotazioni.sort(
+      (a,b)=>a.ora.localeCompare(b.ora)
+    );
 
     render();
 
   } catch(e){
+
     console.log("polling error", e);
+
   } finally {
+
     isFetching = false;
+
   }
 }
-/* REFRESH */
+  
+  /* REFRESH */
 async function refreshSilenzioso() {
   const res = await fetch(API_URL,{
     method:"POST",
