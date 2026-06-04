@@ -721,6 +721,7 @@ async function carica() {
     })
   });
    const json = await res.json();
+  console.log("CARICA RAW:", json);
  prenotazioni = (json.data || []).map(p => ({
   ...p,
   note: p.note || p.notes || p.Note || ""
@@ -862,6 +863,7 @@ async function smartPolling(){
     });
 
     const json = await res.json();
+    console.log("GIORNO RAW:", json);
 
     const nuove = (json.data || []).map(p => ({
       ...p,
