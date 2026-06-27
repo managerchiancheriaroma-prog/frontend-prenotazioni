@@ -1599,7 +1599,14 @@ function renderDisponibilita(){
 
   creaSezione(box,"🍝 Pranzo",pranzo);
 
-  box.innerHTML += "<hr style='margin:20px 0;'>";
+ box.innerHTML += `
+<div style="
+height:1px;
+background:#e5e5e5;
+margin:24px 0;
+border-radius:999px;
+"></div>
+`;
 
   creaSezione(box,"🌙 Cena",cena);
 
@@ -1610,16 +1617,28 @@ function creaSezione(parent,titolo,lista){
   const section = document.createElement("div");
 
   section.innerHTML = `
-      <h3 style="margin-bottom:12px;">
+      <h3 style="
+margin:0 0 15px 0;
+font-size:18px;
+font-weight:800;
+color:#333;
+">
         ${titolo}
       </h3>
 
       <button
-      style="
-      width:100%;
-      background:#f44336;
-      margin-bottom:15px;
-      ">
+style="
+width:100%;
+background:linear-gradient(135deg,#f44336,#d32f2f);
+border:none;
+border-radius:14px;
+padding:12px;
+font-size:15px;
+font-weight:700;
+margin-bottom:18px;
+box-shadow:0 6px 15px rgba(244,67,54,.25);
+cursor:pointer;
+">
       Chiudi tutto
       </button>
   `;
@@ -1636,9 +1655,19 @@ function creaSezione(parent,titolo,lista){
 
       b.innerText=slot;
 
-      b.style.background="#4caf50";
-
-      b.style.margin="0";
+     b.style = `
+background:linear-gradient(135deg,#4caf50,#43a047);
+color:white;
+border:none;
+border-radius:14px;
+padding:12px 6px;
+font-size:14px;
+font-weight:700;
+cursor:pointer;
+box-shadow:0 4px 10px rgba(76,175,80,.25);
+transition:.2s;
+margin:0;
+`;
 
       grid.appendChild(b);
 
