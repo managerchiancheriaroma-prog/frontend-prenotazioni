@@ -1574,11 +1574,49 @@ function toggleDisponibilita(){
 
   disponibilitaModal.style.display = "block";
 
+  renderDisponibilita();
+
 }
 
 function chiudiDisponibilita(){
 
   disponibilitaModal.style.display = "none";
+
+}
+
+function renderDisponibilita(){
+
+  const box = document.getElementById("contenutoDisponibilita");
+
+  box.innerHTML = "";
+
+  const slots = generaSlot();
+
+  slots.forEach(slot => {
+
+    const div = document.createElement("div");
+
+    div.style = `
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px;
+      margin-bottom:8px;
+      border-radius:10px;
+      background:#f5f5f5;
+    `;
+
+    div.innerHTML = `
+      <b>${slot}</b>
+
+      <button disabled>
+        Aperto
+      </button>
+    `;
+
+    box.appendChild(div);
+
+  });
 
 }
   
