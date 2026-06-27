@@ -731,7 +731,9 @@ async function carica() {
 );
   prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
 currentDateLoaded = data.value;
-  render();
+
+render();
+aggiornaRiepilogoGiorno();
  
 }
 async function aggiungi(){
@@ -911,11 +913,12 @@ async function smartPolling(){
 
     prenotazioni = nuove;
 
-    prenotazioni.sort(
-      (a,b)=>a.ora.localeCompare(b.ora)
-    );
+prenotazioni.sort(
+  (a,b)=>a.ora.localeCompare(b.ora)
+);
 
-    render();
+render();
+aggiornaRiepilogoGiorno();
 
   } catch(e){
 
@@ -1088,7 +1091,42 @@ function render(){
   renderLista();
   renderTavoli();
 }
+function aggiornaRiepilogoGiorno(){
 
+  const list = prenotazioni;
+
+  let totPrenotazioni = list.length;
+  let totPersone = 0;
+  let pranzo = 0;
+  let cena = 0;
+
+  list.forEach(p => {
+
+    const persone = Number(p.persone) || 0;
+    totPersone += persone;
+
+    if (!p.ora) return;
+
+    const h = Number(p.ora.split(":")[0]);
+
+    if (h < 18){
+      pranzo += persone;
+    }else{
+      cena += persone;
+    }
+
+  });
+
+  document.getElementById("dayPreview").innerHTML = `
+    <b>📅 ${data.value}</b><br><br>
+    Prenotazioni: <b>${totPrenotazioni}</b><br>
+    👥 Coperti: <b>${totPersone}</b><br>
+    🍝 Pranzo: <b>${pranzo}</b><br>
+    🌙 Cena: <b>${cena}</b>
+  `;
+
+}
+  
 function setFiltro(val){
 const tabTutto = document.getElementById("tabTutto");
 const tabPranzo = document.getElementById("tabPranzo");
