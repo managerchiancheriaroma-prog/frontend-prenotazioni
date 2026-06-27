@@ -418,6 +418,10 @@ button {
 ">
   🚶 Walk-in
 </button>
+
+  <button onclick="toggleDisponibilita()">
+🚫 Disponibilità
+</button>
 </div>
 <div class="right" id="formBox" style="display:none;">
 
@@ -1531,6 +1535,12 @@ function toggleForm(){
     : "block";
 }
 
+  function toggleDisponibilita(){
+
+  alert("Disponibilità");
+
+}
+  
 function toggleWalkin(){
   const box = document.getElementById("walkinBox");
   const form = document.getElementById("formBox");
