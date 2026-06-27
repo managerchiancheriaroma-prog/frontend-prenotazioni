@@ -591,36 +591,38 @@ style="
 </div>
 
 <div id="disponibilitaModal" style="
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:white;
-  border-top-left-radius:20px;
-  border-top-right-radius:20px;
-  padding:20px;
-  display:none;
-  z-index:10000;
-  max-height:75%;
-  overflow:auto;
+position:fixed;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+width:460px;
+max-width:95vw;
+max-height:80vh;
+overflow-y:auto;
+background:white;
+border-radius:18px;
+padding:20px;
+box-shadow:0 15px 40px rgba(0,0,0,.25);
+display:none;
+z-index:99999;
+box-sizing:border-box;
 ">
 
-<h3>🚫 Gestione disponibilità</h3>
+<h2 style="margin-top:0;">
+🚫 Gestione disponibilità
+</h2>
 
-<div id="contenutoDisponibilita">
+<div id="contenutoDisponibilita"></div>
 
-Qui compariranno gli slot.
-
-</div>
-
-<button onclick="chiudiDisponibilita()" style="
+<button
+onclick="chiudiDisponibilita()"
+style="
 width:100%;
-background:#666;
 margin-top:20px;
+background:#555;
 ">
 Chiudi
 </button>
-
 </div>
   
 <script>
@@ -1592,31 +1594,59 @@ function renderDisponibilita(){
 
   const slots = generaSlot();
 
-  slots.forEach(slot => {
+  const pranzo = slots.filter(s => Number(s.split(":")[0]) < 18);
+  const cena = slots.filter(s => Number(s.split(":")[0]) >= 18);
 
-    const div = document.createElement("div");
+  creaSezione(box,"🍝 Pranzo",pranzo);
 
-    div.style = `
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:12px;
-      margin-bottom:8px;
-      border-radius:10px;
-      background:#f5f5f5;
-    `;
+  box.innerHTML += "<hr style='margin:20px 0;'>";
 
-    div.innerHTML = `
-      <b>${slot}</b>
+  creaSezione(box,"🌙 Cena",cena);
 
-      <button disabled>
-        Aperto
+}
+
+function creaSezione(parent,titolo,lista){
+
+  const section = document.createElement("div");
+
+  section.innerHTML = `
+      <h3 style="margin-bottom:12px;">
+        ${titolo}
+      </h3>
+
+      <button
+      style="
+      width:100%;
+      background:#f44336;
+      margin-bottom:15px;
+      ">
+      Chiudi tutto
       </button>
-    `;
+  `;
 
-    box.appendChild(div);
+  const grid = document.createElement("div");
+
+  grid.style.display="grid";
+  grid.style.gridTemplateColumns="repeat(3,1fr)";
+  grid.style.gap="10px";
+
+  lista.forEach(slot=>{
+
+      const b=document.createElement("button");
+
+      b.innerText=slot;
+
+      b.style.background="#4caf50";
+
+      b.style.margin="0";
+
+      grid.appendChild(b);
 
   });
+
+  section.appendChild(grid);
+
+  parent.appendChild(section);
 
 }
   
