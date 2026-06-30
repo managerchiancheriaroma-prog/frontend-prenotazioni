@@ -419,8 +419,18 @@ button {
   🚶 Walk-in
 </button>
 
-  <button onclick="toggleDisponibilita()">
-🚫 Disponibilità
+  <button
+  onclick="apriDisponibilita()"
+  style="
+    border:none;
+    border-radius:14px;
+    padding:14px;
+    background:linear-gradient(135deg,#673ab7,#512da8);
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+  ">
+  🚫 Disponibilità
 </button>
 </div>
 <div class="right" id="formBox" style="display:none;">
@@ -615,13 +625,19 @@ box-sizing:border-box;
 <div id="contenutoDisponibilita"></div>
 
 <button
-onclick="chiudiDisponibilita()"
-style="
-width:100%;
-margin-top:20px;
-background:#555;
-">
-Chiudi
+  onclick="chiudiDisponibilita()"
+  style="
+    width:100%;
+    margin-top:16px;
+    border:none;
+    border-radius:14px;
+    padding:14px;
+    background:#666;
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+  ">
+  Chiudi
 </button>
 </div>
   
