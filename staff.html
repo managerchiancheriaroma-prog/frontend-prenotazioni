@@ -673,6 +673,7 @@ let filtroServizio = "tutti";
 let ignoreNextToast = false;
 let currentDateLoaded = "";
 let prenotazioniMese = [];
+  let disponibilita = [];
 const editModal = document.getElementById("editModal");
   let isRefreshing = false;
   let isFetching = false;
@@ -1602,8 +1603,21 @@ function chiudiDisponibilita(){
 
 }
 
-function renderDisponibilita(){
+async function caricaDisponibilita(){
 
+    const res = await api({
+        action:"getDisponibilita",
+        ristorante,
+        data:giornoSelezionato
+    });
+
+    disponibilita = res.data || [];
+
+}
+  
+async function renderDisponibilita(){
+
+  await caricaDisponibilita();
   const box = document.getElementById("contenutoDisponibilita");
 
   box.innerHTML = "";
@@ -1670,9 +1684,17 @@ cursor:pointer;
       const b=document.createElement("button");
 
       b.innerText=slot;
+    const record = disponibilita.find(x =>
+    x.tipo === "ORA" &&
+    x.valore === slot
+);
+
+const chiuso = record && record.stato === "CHIUSO";
 
      b.style = `
-background:linear-gradient(135deg,#4caf50,#43a047);
+background:${chiuso
+    ? "linear-gradient(135deg,#f44336,#d32f2f)"
+    : "linear-gradient(135deg,#4caf50,#43a047)"};
 color:white;
 border:none;
 border-radius:14px;
@@ -1684,7 +1706,20 @@ box-shadow:0 4px 10px rgba(76,175,80,.25);
 transition:.2s;
 margin:0;
 `;
+b.onclick = async ()=>{
 
+    const res = await api({
+        action:"toggleDisponibilita",
+        ristorante,
+        data:giornoSelezionato,
+        tipo:"ORA",
+        valore:slot
+    });
+
+    await renderDisponibilita();
+
+};
+    
       grid.appendChild(b);
 
   });
