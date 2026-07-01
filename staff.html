@@ -1625,10 +1625,13 @@ async function caricaDisponibilita(){
         data: data.value
     });
 
+    console.log("DISPONIBILITA RAW:", res);
+
     disponibilita = res.data || [];
 
-}
-  
+    console.log("DISPONIBILITA ARRAY:", disponibilita);
+
+}  
 async function renderDisponibilita(){
 
   await caricaDisponibilita();
