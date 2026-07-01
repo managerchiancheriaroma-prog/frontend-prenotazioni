@@ -658,6 +658,20 @@ const data = document.getElementById("data");
 
 const API_URL = "/api/proxy";
 
+  async function api(payload){
+
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify(payload)
+  });
+
+  return await res.json();
+
+}
+
 const PASSWORDS = {
   roma: "roma123",
   napoli: "napoli456",
