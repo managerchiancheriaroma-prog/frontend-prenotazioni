@@ -1722,13 +1722,17 @@ margin:0;
 `;
 b.onclick = async ()=>{
 
+    console.log("CLICK",slot);
+
     const res = await api({
         action:"toggleDisponibilita",
         ristorante: ristorante.value,
-        data: data.value,
+        data:data.value,
         tipo:"ORA",
         valore:slot
     });
+
+    console.log(res);
 
     await renderDisponibilita();
 
