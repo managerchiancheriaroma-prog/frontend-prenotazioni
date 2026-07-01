@@ -1621,8 +1621,8 @@ async function caricaDisponibilita(){
 
     const res = await api({
         action:"getDisponibilita",
-        ristorante,
-        data:giornoSelezionato
+        ristorante: ristorante.value,
+        data: data.value
     });
 
     disponibilita = res.data || [];
@@ -1724,8 +1724,8 @@ b.onclick = async ()=>{
 
     const res = await api({
         action:"toggleDisponibilita",
-        ristorante,
-        data:giornoSelezionato,
+        ristorante: ristorante.value,
+        data: data.value,
         tipo:"ORA",
         valore:slot
     });
