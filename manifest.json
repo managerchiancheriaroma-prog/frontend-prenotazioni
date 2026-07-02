@@ -1,1 +1,16 @@
-
+{
+  "name": "Mia Restaurant",
+  "short_name": "Prenotazioni",
+  "start_url": "/staff.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2e7d32",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
