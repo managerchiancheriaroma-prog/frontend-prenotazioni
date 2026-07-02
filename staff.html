@@ -700,8 +700,24 @@ const editModal = document.getElementById("editModal");
   let isRefreshing = false;
   let isFetching = false;
   
-const tavoliInterna = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16];
-const tavoliEsterna = [21,22,23,24,25,26,41,42];
+const SALE = {
+
+  roma: {
+    interna: [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16],
+    esterna: [21,22,23,24,25,26,41,42]
+  },
+
+  napoli: {
+    interna: [],
+    esterna: []
+  },
+
+  vairano: {
+    interna: [],
+    esterna: []
+  }
+
+};
 
   const ORARI = {
   roma: {
@@ -1444,14 +1460,15 @@ function selectRow(row){
 
 /* TAVOLI (REINSERITI) */
 function renderTavoli(){
+  const sala = SALE[ristorante.value];
   interna.innerHTML="";
   esterna.innerHTML="";
 
-  tavoliInterna.forEach(t=>{
+  sala.interna.forEach(t=>{
     interna.appendChild(creaTavolo(t));
   });
 
-  tavoliEsterna.forEach(t=>{
+  sala.esterna.forEach(t=>{
     esterna.appendChild(creaTavolo(t));
   });
 }
