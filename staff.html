@@ -487,7 +487,9 @@ style="
 <input type="text" id="note">
 </div>
 
-<button onclick="aggiungi()">Aggiungi</button>
+<button id="btnAggiungi" onclick="aggiungi()">
+  Aggiungi
+</button>
 
 </div>
 
@@ -528,7 +530,9 @@ style="
 <input type="number" id="tavoloWalk">
 </div>
 
-<button onclick="aggiungiWalkin()">Assegna Walk-in</button>
+<button id="btnWalkin" onclick="aggiungiWalkin()">
+    Assegna Walk-in
+</button>
 
 </div>
 
@@ -592,7 +596,7 @@ style="
     <input type="text" id="editNote">
   </div>
 
-  <button onclick="salvaModifica()" style="
+  <button id="btnSalvaModifica" onclick="salvaModifica()" style="
     width:100%;
     background:#2196f3;
   ">
@@ -831,6 +835,12 @@ aggiornaRiepilogoGiorno();
 }
 async function aggiungi(){
 
+if (!bloccaPulsante("btnAggiungi", "⏳ Salvataggio...")) {
+  return;
+}
+
+try {
+  
   const ora = document.getElementById("ora");
   const nome = document.getElementById("nome");
   const telefono = document.getElementById("telefono");
@@ -890,7 +900,17 @@ renderCalendarPro();   // 🔥 aggiorna calendario SUBITO
   telefono.value = "";
   persone.value = "";
   note.value = "";
-    toggleForm();
+   toggleForm();
+
+} catch (err) {
+
+  console.error(err);
+  alert("Errore di connessione");
+
+} finally {
+
+  sbloccaPulsante("btnAggiungi");
+
 }
 async function caricaMese(){
 
@@ -1544,6 +1564,48 @@ function updateLocal(row, patch) {
   });
 }
 
+function bloccaPulsante(id,testo){
+
+    const btn = document.getElementById(id);
+
+    if(!btn) return false;
+
+    if(btn.dataset.loading==="1") return false;
+
+    btn.dataset.loading="1";
+
+    btn.dataset.testo = btn.innerHTML;
+
+    btn.disabled = true;
+
+    btn.innerHTML = testo;
+
+    btn.style.opacity=".65";
+
+    btn.style.pointerEvents="none";
+
+    return true;
+
+}
+
+function sbloccaPulsante(id){
+
+    const btn = document.getElementById(id);
+
+    if(!btn) return;
+
+    btn.dataset.loading="0";
+
+    btn.disabled=false;
+
+    btn.innerHTML = btn.dataset.testo || btn.innerHTML;
+
+    btn.style.opacity="1";
+
+    btn.style.pointerEvents="auto";
+
+}
+  
 async function arrivato(e,row){
   e.stopPropagation();
 
