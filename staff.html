@@ -808,31 +808,57 @@ window.onload = () => {
 
 /* CARICA */
 async function carica() {
-  const res = await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"getPrenotazioniGiorno",
-      ristorante:ristorante.value,
-      data:data.value
-    })
-  });
-   const json = await res.json();
-  console.log("CARICA RAW:", json);
- prenotazioni = (json.data || []).map(p => ({
-  ...p,
-  note: p.note || p.notes || p.Note || ""
-}));
- snapshot = prenotazioni.map(p =>
-  `${p.row}-${p.stato}-${p.tavolo}`
-);
-  prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
-currentDateLoaded = data.value;
 
-render();
-aggiornaRiepilogoGiorno();
- 
+  try {
+
+    const res = await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action:"getPrenotazioniGiorno",
+        ristorante:ristorante.value,
+        data:data.value
+      })
+    });
+
+    const json = await res.json();
+
+    if (!json.success) {
+      throw new Error("Risposta non valida dal server");
+    }
+
+    console.log("CARICA RAW:", json);
+
+    prenotazioni = (json.data || []).map(p => ({
+      ...p,
+      note: p.note || p.notes || p.Note || ""
+    }));
+
+    snapshot = prenotazioni.map(p =>
+      `${p.row}-${p.stato}-${p.tavolo}`
+    );
+
+    prenotazioni.sort((a,b)=>a.ora.localeCompare(b.ora));
+
+    currentDateLoaded = data.value;
+
+    render();
+    aggiornaRiepilogoGiorno();
+
+  } catch (err) {
+
+    console.error(err);
+
+    isFetching = false;
+isRefreshing = false;
+
+    alert("Errore di connessione.\nVisualizzo gli ultimi dati disponibili.");
+
+  }
+
 }
+
+  
 async function aggiungi(){
 
 if (!bloccaPulsante("btnAggiungi", "⏳ Salvataggio...")) {
