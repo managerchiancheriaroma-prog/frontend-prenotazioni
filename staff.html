@@ -1940,40 +1940,62 @@ const editNote = document.getElementById("editNote");
   editModal.style.display = "none";
   editRow = null;
 }
+
   async function salvaModifica(){
 
   if (!editRow) return;
 
-  const patch = {
-    ora: editOra.value,
-    nome: editNome.value,
-    telefono: editTelefono.value,
-    persone: editPersone.value,
-    note: editNote.value
-  };
-
-  // update UI locale immediata
-  const p = prenotazioni.find(x => x.row === editRow);
-  if (p) {
-    Object.assign(p, patch);
+  if (!bloccaPulsante("btnSalvaModifica", "⏳ Salvataggio...")) {
+    return;
   }
 
-  render();
-  chiudiModifica();
+  try {
 
-  // update server
-  await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"modificaPrenotazione",
-      ristorante: ristorante.value,
-      row: editRow,
-      ...patch
-    })
-  });
+    const patch = {
+      ora: editOra.value,
+      nome: editNome.value,
+      telefono: editTelefono.value,
+      persone: editPersone.value,
+      note: editNote.value
+    };
 
-  editRow = null;
+    const res = await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action:"modificaPrenotazione",
+        ristorante: ristorante.value,
+        row: editRow,
+        ...patch
+      })
+    });
+
+    const json = await res.json();
+
+    if (!json.success) {
+      alert("Errore durante il salvataggio");
+      return;
+    }
+
+    await carica();
+    await caricaMese();
+    renderCalendarPro();
+
+    chiudiModifica();
+
+    editRow = null;
+
+  } catch (err) {
+
+    console.error(err);
+    alert("Errore di connessione");
+
+  } finally {
+
+    sbloccaPulsante("btnSalvaModifica");
+
+  }
+
 }
   
 
