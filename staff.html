@@ -1859,6 +1859,11 @@ function toggleWalkin(){
     alert("Compila tutti i campi");
     return;
   }
+    if (!bloccaPulsante("btnWalkin", "⏳ Assegnazione...")) {
+  return;
+}
+
+try {
 
   const res = await fetch(API_URL,{
     method:"POST",
@@ -1896,7 +1901,19 @@ renderCalendarPro();   // 🔥 aggiorna calendario SUBITO
   tavoloWalk.value = "";
   oraBtnWalk.innerText = "Seleziona orario";
 
-  toggleWalkin();
+toggleWalkin();
+
+} catch (err) {
+
+  console.error(err);
+  alert("Errore di connessione");
+
+} finally {
+
+  sbloccaPulsante("btnWalkin");
+
+}
+
 }
   function apriModifica(row){
 
