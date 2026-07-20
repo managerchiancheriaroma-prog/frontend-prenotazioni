@@ -1491,7 +1491,11 @@ ${p.note ? `
     <button style="flex:1; padding:8px; font-size:12px; background:#4caf50;" onclick="conferma(event,${p.row})">✔conferma</button>
 <button style="flex:1; padding:8px; font-size:12px; background:#2196f3;" onclick="arrivato(event,${p.row})">🍽arrivato</button>
 <button style="flex:1; padding:8px; font-size:12px; background:#ff9800;" onclick="libera(event,${p.row})">🧹libera</button>
-<button style="flex:1; padding:8px; font-size:12px; background:#f44336;" onclick="elimina(event,${p.row})">🗑elimina</button>
+<button
+style="flex:1; padding:8px; font-size:12px; background:#f44336;"
+onclick="elimina(event,${p.row}, this)">
+🗑 Elimina
+</button>
 
   </div>
 `;
@@ -1680,8 +1684,18 @@ async function libera(e,row){
 }
   
 
-async function elimina(e,row){
+async function elimina(e,row,btn){
   e.stopPropagation();
+
+if (!confirm("Eliminare questa prenotazione?")) {
+  return;
+}
+
+btn.disabled = true;
+btn.dataset.oldText = btn.innerHTML;
+btn.innerHTML = "⏳...";
+  
+ try {
 
   const res = await fetch(API_URL,{
     method:"POST",
@@ -1694,14 +1708,30 @@ async function elimina(e,row){
   });
 
   const json = await res.json();
-  console.log("ELIMINA RISPOSTA:", json);
-
-  // aggiorna UI subito
-  prenotazioni = prenotazioni.filter(p => p.row !== row);
-  snapshot = snapshot.filter(r => r !== row); // 👈 IMPORTANTISSIMO
-
-  render();
+if (!json.success) {
+  alert("Errore durante l'eliminazione");
+  return;
 }
+  
+  console.log("ELIMINA RISPOSTA:", json);
+   await carica();
+await caricaMese();
+renderCalendarPro();
+
+} catch (err) {
+
+  console.error(err);
+  alert("Errore di connessione");
+
+} finally {
+
+  btn.disabled = false;
+  btn.innerHTML = btn.dataset.oldText;
+
+}
+   
+}
+  
 function toggleForm(){
   const box = document.getElementById("formBox");
   const walk = document.getElementById("walkinBox");
