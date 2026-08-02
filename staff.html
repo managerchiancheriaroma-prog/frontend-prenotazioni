@@ -703,7 +703,7 @@ let prenotazioniMese = [];
 const editModal = document.getElementById("editModal");
   let isRefreshing = false;
   let isFetching = false;
-  
+  let isSavingTable = false;
 const SALE = {
 
   roma: {
@@ -1543,10 +1543,19 @@ function creaTavolo(n){
   return d;
 }
 async function assegna(n){
-  if(!selezionata){
+if (isSavingTable) return;
+
+isSavingTable = true;
+  
+ if(!selezionata){
+
+    isSavingTable = false;
+
     alert("Seleziona prenotazione");
+
     return;
-  }
+
+}s
 
   const row = selezionata.row;
 
