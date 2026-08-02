@@ -1543,19 +1543,15 @@ function creaTavolo(n){
   return d;
 }
 async function assegna(n){
-if (isSavingTable) return;
 
-isSavingTable = true;
-  
- if(!selezionata){
+  if (isSavingTable) return;
 
-    isSavingTable = false;
+  isSavingTable = true;
 
+  if(!selezionata){
     alert("Seleziona prenotazione");
-
     return;
-
-}
+  }
 
   const row = selezionata.row;
 
