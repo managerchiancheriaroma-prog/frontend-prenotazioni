@@ -20,21 +20,23 @@ export default async function handler(req, res) {
     console.log("BODY INVIATO A GAS:", body);
 
 
-    const response = await fetch(GAS_URL, {
+const response = await fetch(GAS_URL, {
 
-      method: "POST",
+  method: "POST",
 
-      headers: {
-        "Content-Type": "application/json"
-      },
+  redirect: "follow",
 
-      body: body
+  headers: {
+    "Content-Type": "application/json"
+  },
 
-    });
+  body: body
+
+});
 
 
     console.log("STATUS RISPOSTA GAS:", response.status);
-
+console.log("URL FINALE:", response.url);
 
     const text = await response.text();
 
