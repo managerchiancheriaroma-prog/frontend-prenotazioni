@@ -20,27 +20,33 @@ export default async function handler(req, res) {
     console.log("BODY INVIATO A GAS:", body);
 
 
-const response = await fetch(GAS_URL, {
-
+let response = await fetch(GAS_URL, {
   method: "POST",
-
   redirect: "manual",
-
   headers: {
     "Content-Type": "application/json"
   },
-
   body: body
-
 });
 
-    console.log("STATUS RISPOSTA GAS:", response.status);
-console.log("LOCATION:", response.headers.get("location"));
+console.log("PRIMA RISPOSTA:", response.status);
 
-    console.log("STATUS RISPOSTA GAS:", response.status);
-console.log("URL FINALE:", response.url);
+if (response.status === 302) {
 
-    const text = await response.text();
+  const redirectUrl = response.headers.get("location");
+
+  console.log("REDIRECT GOOGLE:", redirectUrl);
+
+  response = await fetch(redirectUrl, {
+    method: "GET",
+    redirect: "follow"
+  });
+
+}
+
+console.log("STATUS FINALE:", response.status);
+
+const text = await response.text();
 
 
     console.log("RISPOSTA GREZZA GAS:", text);
