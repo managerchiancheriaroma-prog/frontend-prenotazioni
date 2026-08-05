@@ -24,7 +24,7 @@ const response = await fetch(GAS_URL, {
 
   method: "POST",
 
-  redirect: "follow",
+  redirect: "manual",
 
   headers: {
     "Content-Type": "application/json"
@@ -34,6 +34,8 @@ const response = await fetch(GAS_URL, {
 
 });
 
+    console.log("STATUS RISPOSTA GAS:", response.status);
+console.log("LOCATION:", response.headers.get("location"));
 
     console.log("STATUS RISPOSTA GAS:", response.status);
 console.log("URL FINALE:", response.url);
