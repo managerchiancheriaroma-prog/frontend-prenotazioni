@@ -48,6 +48,9 @@ console.log("STATUS FINALE:", response.status);
 
 const text = await response.text();
 
+console.log("URL FINALE:", response.url);
+console.log("HEADERS:", Object.fromEntries(response.headers.entries()));
+
 
     console.log("RISPOSTA GREZZA GAS:", text);
 
