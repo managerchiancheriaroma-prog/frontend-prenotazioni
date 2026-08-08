@@ -1698,16 +1698,19 @@ async function libera(e,row){
 
   try {
 
-    await fetch(API_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({
-        action:"aggiornaTavolo",
-        ristorante:ristorante.value,
-        row,
-        tavolo:""
-      })
-    });
+   const res = await fetch(API_URL,{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body: JSON.stringify({
+    action:"aggiornaStatoPrenotazione",
+    ristorante:ristorante.value,
+    row,
+    stato:"LIBERA"
+  })
+});
+
+const json = await res.json();
+console.log("RISPOSTA AGGIORNA STATO:", json);
 
     await fetch(API_URL,{
       method:"POST",
