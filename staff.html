@@ -705,6 +705,7 @@ const editModal = document.getElementById("editModal");
   let isRefreshing = false;
   let isFetching = false;
   let isSavingTable = false;
+  let isUpdatingState = false;
 const SALE = {
 
   roma: {
@@ -982,7 +983,8 @@ async function smartPolling(){
 
   if (currentDateLoaded !== data.value) return;
   if (isFetching) return;
-
+if (isUpdatingState) return;
+  if (isSavingTable) return;
   // NON pollare mentre guardi un'altra data
   if (
     selectedDay &&
@@ -1589,22 +1591,39 @@ async function assegna(n){
 
   Object.assign(p, patch);
 }
+  
   async function conferma(e,row){
+
   e.stopPropagation();
 
-  updateLocal(row, { stato: "CONFERMATA" });
+  if (isUpdatingState) return;
+
+  isUpdatingState = true;
+
+  updateLocal(row,{stato:"CONFERMATA"});
   render();
 
-  fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"aggiornaStatoPrenotazione",
-      ristorante:ristorante.value,
-      row,
-      stato:"CONFERMATA"
-    })
-  });
+  try{
+
+    await fetch(API_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        action:"aggiornaStatoPrenotazione",
+        ristorante:ristorante.value,
+        row,
+        stato:"CONFERMATA"
+      })
+    });
+
+  }finally{
+
+    isUpdatingState=false;
+
+  }
+
 }
 
 function bloccaPulsante(id,testo){
@@ -1670,29 +1689,42 @@ async function arrivato(e,row){
 async function libera(e,row){
   e.stopPropagation();
 
+  if (isUpdatingState) return;
+
+  isUpdatingState = true;
+
   updateLocal(row, { tavolo: "", stato: "LIBERA" });
   render();
 
-  fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"aggiornaTavolo",
-      ristorante:ristorante.value,
-      row,
-      tavolo:""
-    })
-  });
-  fetch(API_URL,{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body: JSON.stringify({
-    action:"aggiornaStatoPrenotazione",
-    ristorante:ristorante.value,
-    row,
-    stato:"LIBERA"
-  })
-});
+  try {
+
+    await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action:"aggiornaTavolo",
+        ristorante:ristorante.value,
+        row,
+        tavolo:""
+      })
+    });
+
+    await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action:"aggiornaStatoPrenotazione",
+        ristorante:ristorante.value,
+        row,
+        stato:"LIBERA"
+      })
+    });
+
+  } finally {
+
+    isUpdatingState = false;
+
+  }
 }
   
 
