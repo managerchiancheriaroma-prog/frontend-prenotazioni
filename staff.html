@@ -1548,35 +1548,41 @@ async function assegna(n){
 
   isSavingTable = true;
 
-  if(!selezionata){
-    alert("Seleziona prenotazione");
-    return;
+  try {
+
+    if(!selezionata){
+      alert("Seleziona prenotazione");
+      return;
+    }
+
+    const row = selezionata.row;
+
+    const p = prenotazioni.find(x => x.row === row);
+    if (p) p.tavolo = n;
+
+    selezionata = p;
+
+    render();
+
+    await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action:"aggiornaTavolo",
+        ristorante:ristorante.value,
+        row,
+        tavolo:n
+      })
+    });
+
+  } finally {
+
+    isSavingTable = false;
+
   }
-
-  const row = selezionata.row;
-
-  // 1) UPDATE IMMEDIATO UI (zero attesa)
- const p = prenotazioni.find(x => x.row === row);
-if (p) {
-  p.tavolo = n;
 }
-selezionata = p;
-
-  render(); // ← cambio colore immediato
-
-  // 2) chiamata server in background (senza bloccare UI)
-  fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      action:"aggiornaTavolo",
-      ristorante:ristorante.value,
-      row,
-      tavolo:n
-    })
-  }).catch(err => console.log(err));
-}
-function updateLocal(row, patch) {
+  
+  function updateLocal(row, patch) {
   const p = prenotazioni.find(x => x.row === row);
   if (!p) return;
 
